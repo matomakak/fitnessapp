@@ -1,8 +1,59 @@
 <resources>
-    <string name="app_name">recognition</string>
-    <!--
-    This string is used for square devices and overridden by hello_world in
-    values-round/strings.xml for round devices.
-    -->
-    <string name="hello_world">Hello Square World!</string>
+    <string name="app_name">Fitness App</string>
+    <string name="intro_text">Long click to exit the map.</string>
+    <string name="error__no_storage">Storage is not available.</string>
+    <string name="gps_not_available">No GPS on device. Will use phone GPS when available.</string>
+    <string name="gps_waiting">Waiting for GPS…</string>
+    <string name="gps_paused">Tracking paused…</string>
+    <string name="value_default">…</string>
+    <string name="result_title">RESULT</string>
+    <string name="start">Start</string>
+    <string name="pause">Pause</string>
+    <string name="restart_current">Reset current</string>
+    <string name="restart_all">Restart all</string>
+    <string name="forget">Forget last</string>
+    <string name="end">End</string>
+
+    <string name="record_rep">Record rep</string>
+    <string name="complete_rep">Complete rep</string>
+    <string name="download_message">Downloading recognition data</string>
+    <string name="upload_message">Uploading recognition data</string>
+
+    <string name="squats">Squats</string>
+    <string name="backflips">Backflips</string>
+    <string name="sideflips">Sideflips</string>
+    <string name="cartwheels">Cartwheels</string>
+    <string name="unknown">Unknown</string>
+
+    <string name="reps">reps</string>
+    <string name="max_hr">Max:</string>
+    <string name="avg_hr">Avg:</string>
+    <string name="min_hr">Min:</string>
+    <string name="bpm">bpm</string>
+    <string name="sync_fail">Sync failed: </string>
+    <string name="sync_succes">Detection data synced</string>
+
+    <string name="upload_file">upload.txt</string>
+    <string name="upload_url">http://google.com</string>
+    <string name="download_url_labels">http://google.com</string>
+    <string name="download_labels">labels.txt</string>
+    <string name="download_url_data">http://google.com</string>
+    <string name="download_file">detect.txt</string>
+    
+    <string-array name="recognition">
+        <item>Recognition</item>
+        <item>ic_v_white_48dp</item>
+    </string-array>
+    <string-array name="learning">
+        <item>Learning</item>
+        <item>ic_e_white_48dp</item>
+    </string-array>
+    <string-array name="sync">
+        <item>Sync</item>
+        <item>ic_m_white_48dp</item>
+    </string-array>
+    <string-array name="exit">
+        <item>Exit</item>
+        <item>ic_j_white_48dp</item>
+    </string-array>
 </resources>

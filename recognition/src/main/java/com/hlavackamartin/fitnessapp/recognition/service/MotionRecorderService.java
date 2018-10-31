@@ -2,17 +2,14 @@
  * Copyright (c) 2016 Martin Hlavačka
  */
 
-package com.hlavackamartin.fitnessapp.learning.service;
+package com.hlavackamartin.fitnessapp.recognition.service;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.os.Binder;
-import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -23,13 +20,11 @@ import java.io.IOException;
 import java.util.Locale;
 
 
-public class MotionRecorderService extends Service implements SensorEventListener {
+public class MotionRecorderService extends Service implements SensorEventListener{
 
 	private static final String FILE_NAME = "FITness_recordings.csv";
 	
 	private final IBinder mBinder = new LocalBinder();
-
-	private SensorManager mSensorManager;
 
 	private String recordingExercise = null;
 	
@@ -37,6 +32,18 @@ public class MotionRecorderService extends Service implements SensorEventListene
 	private File recordFile = null;
 	
 	private String recordings = "";
+
+	public void forgetLast(String name) {
+		if (recordingExercise != null && recordingExercise.equals(name)) {
+			recordings = "";
+			writer = null;
+			recordingExercise = null;
+		}
+	}
+
+	public void forgetAll() {
+		//TODO remove whole file
+	}
 
 	public boolean executeRepRecording(String name) {
 		if (recordingExercise != null && writer != null) {
@@ -66,29 +73,22 @@ public class MotionRecorderService extends Service implements SensorEventListene
 	
 	public File getFile() throws FileNotFoundException {
 		if (recordFile == null) {
-			recordFile = new File(Environment.getExternalStoragePublicDirectory(
-				Environment.DIRECTORY_DOCUMENTS), FILE_NAME);
-			if (!recordFile.mkdirs()) {
-				throw new FileNotFoundException();
+			File path = this.getExternalFilesDir(null);
+			if (null == path) {
+				path = this.getFilesDir();
 			}
+			if (!path.exists()){
+				if (!path.mkdirs()){
+					throw new FileNotFoundException();
+				}
+			}
+			recordFile = new File(path.getPath() + File.separator + FILE_NAME);
 		}
 		return recordFile;
 	}
-	
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        Sensor mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
-        if( mSensor != null ) {
-			mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
-		}
-    }
     
     @Override
     public void onDestroy() {
-		//todo upload or mark to upload to server
-        mSensorManager.unregisterListener(this);
         if (writer != null) {
 			try {
 				writer.close();
@@ -101,7 +101,7 @@ public class MotionRecorderService extends Service implements SensorEventListene
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
 		if (this.recordingExercise != null && this.writer != null) {
-			String data = String.format(Locale.ENGLISH,"%s,%d,%f,%f,%f",
+			String data = String.format(Locale.ENGLISH,"%s,%d,%f,%f,%f\n",
 				recordingExercise,
 				System.currentTimeMillis(),
 				sensorEvent.values[0],

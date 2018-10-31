@@ -1,16 +1,8 @@
 package com.hlavackamartin.fitnessapp.recognition.fragment.impl;
 
-import android.app.Fragment;
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
-import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.support.wear.widget.drawer.WearableActionDrawerView;
-import android.support.wear.widget.drawer.WearableNavigationDrawerView;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,13 +11,13 @@ import android.widget.TextView;
 
 import com.hlavackamartin.fitnessapp.recognition.R;
 import com.hlavackamartin.fitnessapp.recognition.Utilities;
-import com.hlavackamartin.fitnessapp.recognition.activity.LearnActivity;
 import com.hlavackamartin.fitnessapp.recognition.data.Exercise;
 import com.hlavackamartin.fitnessapp.recognition.data.HeartRateData;
-import com.hlavackamartin.fitnessapp.recognition.fragment.SensorEnabledFragment;
+import com.hlavackamartin.fitnessapp.recognition.fragment.FitnessAppFragment;
 import com.hlavackamartin.fitnessapp.recognition.provider.ActivityInference;
 
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,10 +27,7 @@ import static com.hlavackamartin.fitnessapp.recognition.Utilities.toFloatArray;
 import static java.lang.Math.round;
 
 
-public class RecognitionFragment extends SensorEnabledFragment implements
-	MenuItem.OnMenuItemClickListener,
-	WearableNavigationDrawerView.OnItemSelectedListener,
-	View.OnClickListener{
+public class DetectionFragment extends FitnessAppFragment implements View.OnClickListener{
 	
 	private TensorFlowInferenceInterface inferenceInterface;
 	
@@ -60,13 +49,74 @@ public class RecognitionFragment extends SensorEnabledFragment implements
 
 	private List<String> mLabels;
 
+	@Override
+	public View onCreateView(
+		LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		View rootView = inflater.inflate(R.layout.fragment_detect, container, false);
+
+		mSelectedExercise = "";
+
+		mLabels = Utilities.readRecognitionLabels(getContext());
+
+		mTitle = rootView.findViewById(R.id.detect_title);
+		mValue = rootView.findViewById(R.id.detect_value);
+		mValue.setOnClickListener(this);
+
+		x = new ArrayList<>();
+		y = new ArrayList<>();
+		z = new ArrayList<>();
+		input_signal = new ArrayList<>();
+		activityInference = new ActivityInference(getContext());
+		return super.onCreateView(inflater, container, savedInstanceState);
+	}
 
 	@Override
 	public void onClick(View view) {
 		mValueShowing = mValueShowing.next();
 		updateValue();
 	}
-	
+
+	@Override
+	public int getActionMenu() {
+		return R.menu.action_type_menu;
+	}
+
+	@Override
+	public boolean onMenuItemClick(MenuItem menuItem) {
+		switch (menuItem.getItemId()) {
+			case R.id.reset_current:
+				executeReset();
+				break;
+			case R.id.reset_all:
+				executeResetAll();
+				break;
+		}
+		return true;
+	}
+
+	private void executeReset() {
+		exerciseStats.get(mSelectedExercise).clearStats();
+	}
+
+	private void executeResetAll() {
+		exerciseStats.clear();
+	}
+
+	@Override
+	public void onEnterAmbient(Bundle bundle) {
+		//TODO implement
+	}
+
+	@Override
+	public void onUpdateAmbient() {
+		//TODO implement
+	}
+
+	@Override
+	public void onExitAmbient() {
+		//TODO implement
+	}
+
 	public void onSensorChanged(SensorEvent sensorEvent) {
 		switch (sensorEvent.sensor.getType()) {
 			case Sensor.TYPE_ACCELEROMETER:
@@ -78,7 +128,12 @@ public class RecognitionFragment extends SensorEnabledFragment implements
 		}
 		updateValue();
 	}
-	
+
+	@Override
+	public void onAccuracyChanged(Sensor sensor, int i) {
+
+	}
+
 	private void onMotionChanged (float[] values) {
 		activityPrediction();
 		x.add(values[0]);
@@ -92,6 +147,7 @@ public class RecognitionFragment extends SensorEnabledFragment implements
 
 	private void updateValue() {
 		Exercise exercise = exerciseStats.get(mSelectedExercise);
+		String title = mValueShowing.getName();
 		String value = "...";
 		switch (mValueShowing) {
 			case HR:
@@ -106,32 +162,13 @@ public class RecognitionFragment extends SensorEnabledFragment implements
 				break;
 			case REPS:
 				if (exercise != null) {
+					title = exercise.getName();
 					value = exercise.getReps().toString();
 				}
 				break;
 		}
+		mTitle.setText(title);
 		mValue.setText(value);
-	}
-
-	@Override
-	public View onCreateView(
-		LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View rootView = inflater.inflate(R.layout.activity_main, container, false);
-
-		mSelectedExercise = "";
-
-		//TODO add to mLabels Utilities.readRecognitionLabels(getContext());
-
-		mTitle = rootView.findViewById(R.id.detect_title);
-		mValue = rootView.findViewById(R.id.detect_value);
-		mValue.setOnClickListener(this);
-
-		x = new ArrayList<>();
-		y = new ArrayList<>();
-		z = new ArrayList<>();
-		input_signal = new ArrayList<>();
-		activityInference = new ActivityInference(getContext());
-		return super.onCreateView(inflater, container, savedInstanceState);
 	}
 
 	private void activityPrediction() {
@@ -142,7 +179,7 @@ public class RecognitionFragment extends SensorEnabledFragment implements
 			float[] results = activityInference.getActivityProb(toFloatArray(input_signal));
 
 			for (int i=0; i<mLabels.size(); i++) {
-				if (round(results[0]) > 0.7) {
+				if (round(results[i]) > 0.7) {
 					getExerciseStat(mLabels.get(i)).addRep();
 				}
 			}
@@ -161,12 +198,22 @@ public class RecognitionFragment extends SensorEnabledFragment implements
 	}
 
 	public enum ValueType {
-		REPS,
-		HR,
-		AVG_HR,
-		MAX_HR;
+		REPS("Reps"),
+		HR("HR"),
+		AVG_HR("Avg HR"),
+		MAX_HR("Max HR");
+		
+		private final String name;
+		
+		ValueType(String name) {
+			this.name = name;
+		}		
 
 		private static ValueType[] vals = values();
+		
+		public String getName() {
+			return this.name;
+		}
 
 		public ValueType next() {
 			return vals[(this.ordinal() + 1) % vals.length];

@@ -1,28 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.wear.widget.BoxInsetLayout
+<android.support.wear.widget.drawer.WearableDrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_grey"
-    android:padding="@dimen/box_inset_layout_padding"
-    tools:context="com.hlavackamartin.fitnessapp.recognition.MainActivity"
+    android:background="@color/black"
+    tools:context="com.hlavackamartin.fitnessapp.recognition.activity.MainActivity"
     tools:deviceIds="wear">
 
     <FrameLayout
+        android:id="@+id/content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <android.support.wear.widget.drawer.WearableNavigationDrawerView
+        android:id="@+id/top_nav"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="@dimen/inner_frame_layout_padding"
-        app:boxedEdges="all">
+        android:background="@color/grey"/>
 
-        <TextView
-            android:id="@+id/text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/hello_world"/>
-
-    </FrameLayout>
-</android.support.wear.widget.BoxInsetLayout>
+    <android.support.wear.widget.drawer.WearableActionDrawerView
+        android:id="@+id/bottom_nav"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/grey"
+        app:actionMenu="@menu/action_type_menu" />
+    
+</android.support.wear.widget.drawer.WearableDrawerLayout>
 

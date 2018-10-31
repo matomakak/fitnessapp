@@ -2,14 +2,25 @@
  * Copyright (c) 2016 Martin Hlavačka
  */
 
-package com.hlavackamartin.fitnessapp.common;
+package com.hlavackamartin.fitnessapp.recognition;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Environment;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Utilities class providing system-wide functions as vibration and preference saving/restoring
@@ -61,5 +72,49 @@ public class Utilities {
 
 		NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
 		return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+	}
+
+	public static float[] toFloatArray(List<Float> list) {
+		int i = 0;
+		float[] array = new float[list.size()];
+
+		for (Float f : list) {
+			array[i++] = (f != null ? f : Float.NaN);
+		}
+		return array;
+	}
+
+	public static boolean isExternalStorageWritable() {
+		String state = Environment.getExternalStorageState();
+		return Environment.MEDIA_MOUNTED.equals(state);
+	}
+
+	public static List<String> readRecognitionLabels(Context context) {
+		FileInputStream fstream;
+		try {
+			fstream = new FileInputStream(new File(
+				Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+				context.getString(R.string.download_labels)));
+		} catch (FileNotFoundException e) {
+			return Collections.emptyList();
+		}
+		BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
+		List<String> labels = new ArrayList<>();
+
+		String strLine;
+		try {
+			while ((strLine = br.readLine()) != null)   {
+				labels.add(strLine);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		try {
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return labels;
 	}
 }

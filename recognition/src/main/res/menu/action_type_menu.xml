@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
+    <item android:id="@+id/reset_current"
+          android:icon="@drawable/ic_info_outline_black_18dp"
+          android:title="@string/restart_current"/>
+    <item android:id="@+id/reset_all"
+          android:icon="@drawable/ic_info_outline_black_18dp"
+          android:title="@string/restart_all"/>
 </menu>

@@ -1,22 +1,16 @@
 package com.hlavackamartin.fitnessapp.recognition.fragment;
 
 import android.app.Fragment;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.os.Bundle;
+import android.support.wearable.activity.WearableActivityDelegate;
+import android.view.MenuItem;
 
 
-public abstract class SensorEnabledFragment extends Fragment implements SensorEventListener {
+public abstract class FitnessAppFragment extends Fragment implements 
+	SensorEventListener, 
+	WearableActivityDelegate.AmbientCallback,
+	MenuItem.OnMenuItemClickListener {
 	
-	public abstract void executeReset();
-	public abstract void executeResetAll();
-	public abstract void onEnterAmbientInFragment(Bundle ambientDetails);
-	public abstract void onExitAmbientInFragment();
+	public abstract int getActionMenu();
 	
-	@Override
-	public abstract void onSensorChanged(SensorEvent sensorEvent);
-
-	@Override
-	public abstract void onAccuracyChanged(Sensor sensor, int i);
 }

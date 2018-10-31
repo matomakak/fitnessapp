@@ -1,4 +1,4 @@
-package com.hlavackamartin.fitnessapp.recognition.activity;
+package com.hlavackamartin.fitnessapp.recognition.provider;
 
 import android.content.Context;
 import android.content.res.AssetManager;

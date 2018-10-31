@@ -1,4 +1,4 @@
-package com.hlavackamartin.fitnessapp.recognition.fragment;
+package com.hlavackamartin.fitnessapp.recognition.fragment.impl;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -6,12 +6,11 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.speech.RecognizerIntent;
-import android.support.wear.widget.drawer.WearableActionDrawerView;
-import android.support.wear.widget.drawer.WearableNavigationDrawerView;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,18 +21,15 @@ import android.widget.TextView;
 
 import com.hlavackamartin.fitnessapp.recognition.R;
 import com.hlavackamartin.fitnessapp.recognition.Utilities;
+import com.hlavackamartin.fitnessapp.recognition.fragment.FitnessAppFragment;
 import com.hlavackamartin.fitnessapp.recognition.service.MotionRecorderService;
 
 import java.util.List;
 
 
-public class LearningFragment extends SensorEnabledFragment implements
-	MenuItem.OnMenuItemClickListener,
-	View.OnClickListener,
-	WearableNavigationDrawerView.OnItemSelectedListener{
+public class LearningFragment extends FitnessAppFragment implements View.OnClickListener{
 	
 	private static final int SPEECH_REQUEST_CODE = 1;
-	private WearableActionDrawerView mWearableActionDrawer;
 
 	private TextView mTitle;
 	private Button mButton;
@@ -56,32 +52,22 @@ public class LearningFragment extends SensorEnabledFragment implements
 		}
 	};
 	
+	public LearningFragment() {}
+	
 	@Override
 	public View onCreateView(
 		LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View rootView = inflater.inflate(R.layout.activity_learn, container, false);
-
-		WearableNavigationDrawerView mWearableNavigationDrawer = rootView.findViewById(R.id.learn_top_nav);
-		mWearableNavigationDrawer.setAdapter(new NavigationAdapter(getContext()));
-		// Peeks navigation drawer on the top.
-		mWearableNavigationDrawer.getController().peekDrawer();
-		mWearableNavigationDrawer.addOnItemSelectedListener(this);
-
-		mWearableActionDrawer = rootView.findViewById(R.id.learn_bottom_nav);
-		// Peeks action drawer on the bottom.
-		mWearableActionDrawer.getController().peekDrawer();
-		mWearableActionDrawer.setOnMenuItemClickListener(this);
+		View rootView = inflater.inflate(R.layout.fragment_learn, container, false);
 
 		mTitle = rootView.findViewById(R.id.learn_title);
 		mButton = rootView.findViewById(R.id.learn_btn);
 
 		if (Utilities.isExternalStorageWritable()) {
-			mTitle.setText(selectedExercise);
+			mTitle.setText(R.string.record_rep);
 			mButton.setOnClickListener(this);
 			mProgressBar = rootView.findViewById(R.id.learn_progressBar);
 			mProgressBar.getIndeterminateDrawable().setColorFilter(Color.DKGRAY, PorterDuff.Mode.SRC_IN);
-			// Enables Always-on
-
+			
 			Intent intent = new Intent(getActivity(), MotionRecorderService.class);
 			getActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
 		}
@@ -100,15 +86,9 @@ public class LearningFragment extends SensorEnabledFragment implements
 			mButton.setEnabled(Utilities.isExternalStorageWritable());
 		}
 	}
-	
-	@Override
-	public void onItemSelected(int pos) {
-		if (pos == 0) {
-			this.mService.forgetLast(this.selectedExercise);
-		}
-	}
 
-	@Override
+	//TODO exercise unknown?
+	/*@Override
 	public boolean onMenuItemClick(MenuItem menuItem) {
 		if (menuItem.getItemId() == R.id.exercise_unknown) {
 			Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -119,7 +99,7 @@ public class LearningFragment extends SensorEnabledFragment implements
 		this.mWearableActionDrawer.getController().closeDrawer();
 		updateSelectedExercise(menuItem.getTitle().toString());
 		return true;
-	}
+	}*/
 
 	private void updateSelectedExercise(String name) {
 		this.selectedExercise = name;
@@ -149,10 +129,15 @@ public class LearningFragment extends SensorEnabledFragment implements
 	}
 
 	public void indicateRepProcessing(boolean processing){
-		if(this.mProgressBar != null)
+		if (this.mProgressBar != null) {
 			this.mProgressBar.setVisibility(processing ? View.VISIBLE : View.GONE);
-		if(this.mButton != null) {
-			this.mButton.setText(processing ? R.string.complete_rep : R.string.record_rep);
+		}
+		if (this.mButton != null) {
+			this.mButton.setBackground(getActivity().getDrawable(
+				processing ? R.drawable.btn_pause_normal_200 : R.drawable.btn_start_normal_200));
+		}
+		if (this.mTitle != null) {
+			this.mTitle.setText(processing ? R.string.complete_rep : R.string.record_rep);
 		}
 	}
 
@@ -174,29 +159,69 @@ public class LearningFragment extends SensorEnabledFragment implements
 			mServiceBound = false;
 		}
 	}
-	
-	private final class NavigationAdapter
-		extends WearableNavigationDrawerView.WearableNavigationDrawerAdapter {
 
-		private final Context mContext;
-
-		NavigationAdapter(Context context) {
-			mContext = context;
+	private void executeReset() {
+		if (mServiceBound) {
+			this.mService.forgetLast(this.selectedExercise);
 		}
+	}
 
-		@Override
-		public int getCount() {
-			return 1;
+	private void executeResetAll() {
+		if (mServiceBound) {
+			this.mService.forgetAll();
 		}
+	}
 
-		@Override
-		public String getItemText(int pos) {
-			return getResources().getString(R.string.forget);
-		}
+	@Override
+	public int getActionMenu() {
+		return R.menu.learning_type_menu;
+	}
 
-		@Override
-		public Drawable getItemDrawable(int pos) {
-			return mContext.getDrawable(R.drawable.btn_end_normal_200);
+	@Override
+	public boolean onMenuItemClick(MenuItem menuItem) {
+		switch (menuItem.getItemId()) {
+			case R.id.menu_backflips:
+			case R.id.menu_squats:
+			case R.id.menu_unknown:
+				this.selectedExercise = menuItem.getTitle().toString();
+				this.mTitle.setText(selectedExercise);
+				break;
+			case R.id.reset_current:
+				executeReset();
+				break;
+			case R.id.reset_all:
+				executeResetAll();
+				break;
 		}
+		return true;
+	}
+
+	@Override
+	public void onSensorChanged(SensorEvent sensorEvent) {
+		if (mServiceBound) {
+			mService.onSensorChanged(sensorEvent);
+		}
+	}
+
+	@Override
+	public void onAccuracyChanged(Sensor sensor, int i) {
+		if (mServiceBound) {
+			mService.onAccuracyChanged(sensor, i);
+		}
+	}
+
+	@Override
+	public void onEnterAmbient(Bundle bundle) {
+		//TODO ambient
+	}
+
+	@Override
+	public void onUpdateAmbient() {
+		//TODO ambient
+	}
+
+	@Override
+	public void onExitAmbient() {
+		//TODO ambient
 	}
 }

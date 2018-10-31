@@ -1,40 +1,23 @@
 package com.hlavackamartin.fitnessapp.recognition.data;
 
-public class Exercise {
+public class HeartRateData {
 
-	private String name;
-	private Integer reps = 0;
+	private Integer currentHR = 0;
 	private Float avgHR = 0f;
 	private Integer maxHR = 0;
 	private Long hrCount = 0L;
-
-	public Exercise(String name) {
-		this.name = name;
-	}
-	
-	public void clearStats() {
-		this.reps = 0;
-		this.avgHR = 0f;
-		this.maxHR = 0;
-		this.hrCount = 0L;
-	}
-
-	public void addRep() {
-		this.reps++;
-	}
 	
 	public void updateHR(int currentHR) {
-		avgHR = ((avgHR * hrCount) + currentHR) / ++hrCount;
-		if( currentHR > maxHR )
-			maxHR = currentHR;
+		if (currentHR > 30) {
+			this.currentHR = currentHR;
+			avgHR = ((avgHR * hrCount) + this.currentHR) / ++hrCount;
+			if (this.currentHR > maxHR)
+				maxHR = this.currentHR;
+		}
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public Integer getReps() {
-		return reps;
+	public Integer getCurrentHR() {
+		return currentHR;
 	}
 
 	public Float getAvgHR() {

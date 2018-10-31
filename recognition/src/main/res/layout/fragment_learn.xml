@@ -1,60 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.wear.widget.BoxInsetLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/black"
-    android:padding="0dp"
-    tools:context="com.hlavackamartin.fitnessapp.recognition.activity.LearnActivity"
-    tools:deviceIds="wear">
+    android:layout_height="match_parent">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:boxedEdges="all">
+    <TextView
+        android:id="@+id/learn_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_centerHorizontal="true"
+        android:textAlignment="center"
+        android:textColor="@color/white"/>
 
-        <TextView
-            android:id="@+id/learn_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:textAlignment="center"
-            android:textColor="@color/white"/>
-        
-        <ProgressBar
-            android:id="@+id/learn_progressBar"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="86dp"
-            android:layout_height="86dp"
-            android:layout_centerInParent="true"
-            android:visibility="gone" />
+    <ProgressBar
+        android:id="@+id/learn_progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_centerInParent="true"
+        android:visibility="visible" />
 
-        <Button
-            android:id="@+id/learn_btn"
-            android:layout_width="66dp"
-            android:layout_height="66dp"
-            android:layout_centerInParent="true"
-            android:background="@drawable/start_button"/>
+    <Button
+        android:id="@+id/learn_btn"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/start_button"/>
 
-    </RelativeLayout>
-
-    <android.support.wear.widget.drawer.WearableNavigationDrawerView
-        android:id="@+id/learn_top_nav"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/grey"
-        android:visibility="invisible"/>
-
-    <android.support.wear.widget.drawer.WearableActionDrawerView
-        android:id="@+id/learn_bottom_nav"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/grey"
-        app:actionMenu="@menu/exercise_type_menu"
-        android:visibility="invisible"/>
-    
-</android.support.wear.widget.BoxInsetLayout>
-
+</RelativeLayout>
