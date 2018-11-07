@@ -5,73 +5,99 @@
 package com.hlavackamartin.fitnessapp.recognition.service;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.IBinder;
-import android.util.Log;
+
+import com.hlavackamartin.fitnessapp.recognition.Utilities;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Optional;
 
 
-public class MotionRecorderService extends Service implements SensorEventListener{
+public class MotionRecorderService extends Service implements SensorEventListener {
 
 	private static final String FILE_NAME = "FITness_recordings.csv";
 	
 	private final IBinder mBinder = new LocalBinder();
 
+	private SensorManager mSensorManager;
+
+	private RecordingStatus recordingStatus;
 	private String recordingExercise = null;
 	
 	private FileOutputStream writer;
 	private File recordFile = null;
-	
-	private String recordings = "";
 
-	public void forgetLast(String name) {
-		if (recordingExercise != null && recordingExercise.equals(name)) {
-			recordings = "";
-			writer = null;
-			recordingExercise = null;
-		}
+	@Override
+	public IBinder onBind(Intent intent) {
+		mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+
+		Utilities.initializeSensor(this, mSensorManager, Sensor.TYPE_ACCELEROMETER);
+		Utilities.initializeSensor(this, mSensorManager, Sensor.TYPE_HEART_RATE);
+		recordingStatus = RecordingStatus.STOPPED;
+		return mBinder;
 	}
 
-	public void forgetAll() {
-		//TODO remove whole file
+	@Override
+	public boolean onUnbind(Intent intent) {
+		mSensorManager.unregisterListener(this);
+		return super.onUnbind(intent);
 	}
 
-	public boolean executeRepRecording(String name) {
-		if (recordingExercise != null && writer != null) {
-			recordings += "\n";
-			try {
-				writer.write(recordings.getBytes());
-				writer.flush();
-				writer.close();
-			} catch (IOException ignored) {
-			}
-			recordings = "";
-			writer = null;
-			recordingExercise = null;
-			return false;
-		}
-		else {
-			try {
-				recordings = "";
-				writer = new FileOutputStream(getFile(), true);
-				recordingExercise = name;
-			} catch (FileNotFoundException e) {
-				return false;
-			}
+	public RecordingStatus getRecordingStatus() {
+		return this.recordingStatus;
+	}
+
+	public boolean startRepRecording(String name) {
+		if (recordingStatus == RecordingStatus.STOPPED) {
+			loadWriter();
+			recordingExercise = name;
+			recordingStatus = RecordingStatus.RECORDING;
 			return true;
 		}
+		return false;
+	}
+
+	public void setRepsForFinishedRecording(Integer reps) {
+		if (recordingStatus == RecordingStatus.WAITING_FOR_REPS) {
+			getWriter().ifPresent(w -> {
+				try {
+					w.write(String.format(Locale.ENGLISH, "#reps,%d,0,0,0\n\n", reps).getBytes());
+					w.flush();
+					recordingStatus = RecordingStatus.STOPPED;
+				} catch (IOException ignored) {
+				}
+			});
+		}
 	}
 	
-	public File getFile() throws FileNotFoundException {
+	public void stopRepRecording() {
+		if (recordingStatus == RecordingStatus.RECORDING) {
+			recordingStatus = RecordingStatus.WAITING_FOR_REPS;
+		}
+	}
+
+	public void deleteData() {
+		if (recordingStatus == RecordingStatus.STOPPED) {
+			try {
+				if (getFile().exists())
+					getFile().delete();
+			} catch (FileNotFoundException ignored) {
+			}
+		}
+	}
+
+	private File getFile() throws FileNotFoundException {
 		if (recordFile == null) {
 			File path = this.getExternalFilesDir(null);
 			if (null == path) {
@@ -86,21 +112,23 @@ public class MotionRecorderService extends Service implements SensorEventListene
 		}
 		return recordFile;
 	}
-    
-    @Override
-    public void onDestroy() {
-        if (writer != null) {
-			try {
-				writer.close();
-			} catch (IOException ignored) {
-			}
+
+	private void loadWriter() {
+		try {
+			writer = new FileOutputStream(getFile(), true);
+		} catch (FileNotFoundException e) {
+			writer = null;
 		}
-        super.onDestroy();
-    }
+	}
+	
+	private Optional<FileOutputStream> getWriter() {
+		return Optional.ofNullable(writer);
+	}
     
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-		if (this.recordingExercise != null && this.writer != null) {
+		//TODO last 0.7 second filter-out
+		if (recordingStatus == RecordingStatus.RECORDING) {
 			String data = String.format(Locale.ENGLISH,"%s,%d,%f,%f,%f\n",
 				recordingExercise,
 				System.currentTimeMillis(),
@@ -108,22 +136,39 @@ public class MotionRecorderService extends Service implements SensorEventListene
 				sensorEvent.values[1],
 				sensorEvent.values[2]
 			);
-			recordings += data;
-			Log.d("ACCELEROMETER_DATA",data);
+			getWriter().ifPresent(w -> {
+				try {
+					writer.write(data.getBytes());
+				} catch (IOException ignored) {
+					//TODO
+				}
+			});
 		}
     }
 
+	@Override
+	public void onDestroy() {
+		getWriter().ifPresent(w -> {
+			try {
+				w.close();
+			} catch (IOException ignored) {
+			}
+		});
+		super.onDestroy();
+	}
+
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {    }
-
-	@Override
-	public IBinder onBind(Intent intent) {
-		return mBinder;
-	}
 	
 	public class LocalBinder extends Binder {
 		public MotionRecorderService getService() {
 			return MotionRecorderService.this;
 		}
+	}
+	
+	public enum RecordingStatus {
+		RECORDING,
+		WAITING_FOR_REPS,
+		STOPPED
 	}
 }

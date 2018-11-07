@@ -6,6 +6,9 @@ package com.hlavackamartin.fitnessapp.recognition;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.hardware.Sensor;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
@@ -35,8 +38,8 @@ public class Utilities {
      * @param context activity context
      * @param duration duration of vibration in ms
      */
-    public static void vibrate(Context context, int duration) {
-        if (duration == 0) {
+    public static void vibrate(Context context, Integer duration) {
+        if (duration == null) {
             duration = DEFAULT_VIBRATION_DURATION_MS;
         }
         Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
@@ -83,6 +86,13 @@ public class Utilities {
 		}
 		return array;
 	}
+
+	public static void initializeSensor(SensorEventListener listener, SensorManager sensorManager, int sensorType) {
+		Sensor mSensor = sensorManager.getDefaultSensor(sensorType);
+		if (mSensor != null)
+			sensorManager.registerListener(listener, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
+	}
+
 
 	public static boolean isExternalStorageWritable() {
 		String state = Environment.getExternalStorageState();

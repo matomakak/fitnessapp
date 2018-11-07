@@ -2,12 +2,7 @@ package com.hlavackamartin.fitnessapp.recognition.activity;
 
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.wear.widget.drawer.WearableActionDrawerView;
 import android.support.wear.widget.drawer.WearableNavigationDrawerView;
@@ -20,8 +15,8 @@ import com.hlavackamartin.fitnessapp.recognition.R;
 import com.hlavackamartin.fitnessapp.recognition.Utilities;
 import com.hlavackamartin.fitnessapp.recognition.data.MainMenuItem;
 import com.hlavackamartin.fitnessapp.recognition.fragment.FitnessAppFragment;
-import com.hlavackamartin.fitnessapp.recognition.fragment.impl.LearningFragment;
 import com.hlavackamartin.fitnessapp.recognition.fragment.impl.DetectionFragment;
+import com.hlavackamartin.fitnessapp.recognition.fragment.impl.LearningFragment;
 import com.hlavackamartin.fitnessapp.recognition.task.SynchronizeTask;
 
 import java.util.ArrayList;
@@ -29,24 +24,15 @@ import java.util.List;
 import java.util.Optional;
 
 public class MainActivity extends WearableActivity implements
-	SensorEventListener,
 	WearableNavigationDrawerView.OnItemSelectedListener,
 	MenuItem.OnMenuItemClickListener {
 
 	private List<FitnessAppFragment> mFragments = new ArrayList<>();
 	private int mActiveFragment;
 
-	private SensorManager mSensorManager;
-
 	private NavigationAdapter mNavigationAdapter;
 	private WearableNavigationDrawerView mWearableNavigationDrawer;
 	private WearableActionDrawerView mWearableActionDrawer;
-	
-	@Override
-	protected void onDestroy() {
-		mSensorManager.unregisterListener(this);
-		super.onDestroy();
-	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -71,11 +57,6 @@ public class MainActivity extends WearableActivity implements
 		mActiveFragment = 1;
 		updateCurrentFragment();
 		
-		mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-
-		initializeSensor(Sensor.TYPE_ACCELEROMETER);
-		initializeSensor(Sensor.TYPE_HEART_RATE);
-		
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		setAmbientEnabled();
 	}
@@ -92,22 +73,6 @@ public class MainActivity extends WearableActivity implements
 		return Optional.ofNullable(mFragments.get(mActiveFragment));
 	}
 
-	private void initializeSensor(int sensorType) {
-		Sensor mSensor = mSensorManager.getDefaultSensor(sensorType);
-		if (mSensor != null)
-			mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
-	}
-
-	@Override
-	public void onSensorChanged(SensorEvent sensorEvent) {
-		getCurrentFragment().ifPresent(f -> f.onSensorChanged(sensorEvent));
-	}
-
-	@Override
-	public void onAccuracyChanged(Sensor sensor, int i) {
-		getCurrentFragment().ifPresent(f -> f.onAccuracyChanged(sensor, i));
-	}
-
 	@Override
 	public void onItemSelected(int position) {
 		mNavigationAdapter.executeAction(position);
@@ -115,7 +80,10 @@ public class MainActivity extends WearableActivity implements
 
 	@Override
 	public boolean onMenuItemClick(MenuItem menuItem) {
-		return getCurrentFragment().isPresent() && getCurrentFragment().get().onMenuItemClick(menuItem);
+		boolean res = getCurrentFragment().isPresent() && getCurrentFragment().get().onMenuItemClick(menuItem);
+		mWearableActionDrawer.getController().closeDrawer();
+		mWearableActionDrawer.getController().peekDrawer();
+		return res;
 	}
 
 	@Override

@@ -1,14 +1,14 @@
 package com.hlavackamartin.fitnessapp.recognition.fragment.impl;
 
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.speech.RecognizerIntent;
 import android.view.LayoutInflater;
@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -25,9 +26,12 @@ import com.hlavackamartin.fitnessapp.recognition.fragment.FitnessAppFragment;
 import com.hlavackamartin.fitnessapp.recognition.service.MotionRecorderService;
 
 import java.util.List;
+import java.util.Locale;
 
 
-public class LearningFragment extends FitnessAppFragment implements View.OnClickListener{
+public class LearningFragment extends FitnessAppFragment implements 
+	View.OnClickListener,
+	NumberPicker.OnValueChangeListener {
 	
 	private static final int SPEECH_REQUEST_CODE = 1;
 
@@ -61,70 +65,82 @@ public class LearningFragment extends FitnessAppFragment implements View.OnClick
 
 		mTitle = rootView.findViewById(R.id.learn_title);
 		mButton = rootView.findViewById(R.id.learn_btn);
+		mButton.setEnabled(false);
 
 		if (Utilities.isExternalStorageWritable()) {
-			mTitle.setText(R.string.record_rep);
+			mTitle.setText(R.string.select_exercise);
 			mButton.setOnClickListener(this);
 			mProgressBar = rootView.findViewById(R.id.learn_progressBar);
-			mProgressBar.getIndeterminateDrawable().setColorFilter(Color.DKGRAY, PorterDuff.Mode.SRC_IN);
+			mProgressBar.getIndeterminateDrawable().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
+			mProgressBar.setVisibility(View.GONE);
 			
 			Intent intent = new Intent(getActivity(), MotionRecorderService.class);
 			getActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
 		}
 		else {
 			mTitle.setText(R.string.error__no_storage);
-			mButton.setEnabled(false);
 		}
 
 		return rootView;
 	}
-	
-	@Override
-	public void onResume() {
-		super.onResume();
+
+	private void enableSelectedExercise(String name) {
+		this.selectedExercise = name;
+		this.mTitle.setText(selectedExercise);
 		if (mButton != null) {
 			mButton.setEnabled(Utilities.isExternalStorageWritable());
 		}
 	}
 
-	//TODO exercise unknown?
-	/*@Override
-	public boolean onMenuItemClick(MenuItem menuItem) {
-		if (menuItem.getItemId() == R.id.exercise_unknown) {
-			Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-			intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-				RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-			startActivityForResult(intent, SPEECH_REQUEST_CODE);
-		}
-		this.mWearableActionDrawer.getController().closeDrawer();
-		updateSelectedExercise(menuItem.getTitle().toString());
-		return true;
-	}*/
-
-	private void updateSelectedExercise(String name) {
-		this.selectedExercise = name;
-		this.mTitle.setText(selectedExercise);
-	}
-
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == SPEECH_REQUEST_CODE) {
-			try {
-				List<String> results = data.getStringArrayListExtra(
-					RecognizerIntent.EXTRA_RESULTS);
-				this.updateSelectedExercise(results.get(0));
-			} catch (NullPointerException ex) {
-				//TODO log
-			}
-		}
-		super.onActivityResult(requestCode, resultCode, data);
-	}
-
 	@Override
 	public void onClick(View view) {
-		if(mServiceBound) {
-			boolean inProgress = this.mService.executeRepRecording(this.selectedExercise);
-			indicateRepProcessing(inProgress);
+		if(mButton.isEnabled() && mServiceBound) {
+			MotionRecorderService.RecordingStatus status = 
+				mService.getRecordingStatus();
+			if (status == MotionRecorderService.RecordingStatus.STOPPED) {
+				showStartCountDownDialog();
+			}
+			else if (status == MotionRecorderService.RecordingStatus.RECORDING) {
+				mService.stopRepRecording();
+				indicateRepProcessing(false);
+				showRepCountPickerDialog();
+			}
+		}
+	}
+	
+	public void showRepCountPickerDialog() {
+		NumberPickerDialog newFragment = new NumberPickerDialog();
+		newFragment.setValueChangeListener(this);
+		newFragment.show(getFragmentManager(), "rep count");
+	}
+	
+	public void showStartCountDownDialog() {
+		AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
+		alertDialog.setTitle("Start in");
+		alertDialog.setMessage("3");
+		alertDialog.show();
+
+		new CountDownTimer(3000, 100) {
+			@Override
+			public void onTick(long millisUntilFinished) {
+				alertDialog.setMessage(String.format(Locale.ENGLISH,"%.1f",millisUntilFinished / (float)1000));
+			}
+
+			@Override
+			public void onFinish() {
+				alertDialog.dismiss();
+				startRecording();
+			}
+		}.start();
+	}
+
+	public void startRecording() {
+		indicateRepProcessing(true);
+		if (this.mService.startRepRecording(this.selectedExercise)) {
+			Utilities.vibrate(getActivity(), null);
+		} 
+		else {
+			indicateRepProcessing(false);
 		}
 	}
 
@@ -133,42 +149,19 @@ public class LearningFragment extends FitnessAppFragment implements View.OnClick
 			this.mProgressBar.setVisibility(processing ? View.VISIBLE : View.GONE);
 		}
 		if (this.mButton != null) {
-			this.mButton.setBackground(getActivity().getDrawable(
-				processing ? R.drawable.btn_pause_normal_200 : R.drawable.btn_start_normal_200));
+			mButton.setSelected(processing);
+			mButton.setPressed(processing);
 		}
 		if (this.mTitle != null) {
-			this.mTitle.setText(processing ? R.string.complete_rep : R.string.record_rep);
+			this.mTitle.setText(processing ? getString(R.string.complete_rep) : selectedExercise );
 		}
 	}
 
 	@Override
-	public void onPause() {
-		endTask();
-		super.onPause();
-	}
-	
-	@Override
-	public void onDestroy() {
-		endTask();
-		super.onDestroy();
-	}
-
-	private void endTask(){
+	public void onValueChange(NumberPicker numberPicker, int i, int i1) {
+		//AFTER NUMBER PICKER DIALOG
 		if (mServiceBound) {
-			getActivity().unbindService(mServiceConnection);
-			mServiceBound = false;
-		}
-	}
-
-	private void executeReset() {
-		if (mServiceBound) {
-			this.mService.forgetLast(this.selectedExercise);
-		}
-	}
-
-	private void executeResetAll() {
-		if (mServiceBound) {
-			this.mService.forgetAll();
+			this.mService.setRepsForFinishedRecording(numberPicker.getValue());
 		}
 	}
 
@@ -182,31 +175,51 @@ public class LearningFragment extends FitnessAppFragment implements View.OnClick
 		switch (menuItem.getItemId()) {
 			case R.id.menu_backflips:
 			case R.id.menu_squats:
-			case R.id.menu_unknown:
-				this.selectedExercise = menuItem.getTitle().toString();
-				this.mTitle.setText(selectedExercise);
+				this.enableSelectedExercise(menuItem.getTitle().toString());
+				break;
+			case R.id.menu_custom:
+				Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+				intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+				startActivityForResult(intent, SPEECH_REQUEST_CODE);
 				break;
 			case R.id.reset_current:
-				executeReset();
-				break;
 			case R.id.reset_all:
-				executeResetAll();
+				if (mServiceBound) {
+					mService.deleteData();
+				}
 				break;
 		}
 		return true;
 	}
 
 	@Override
-	public void onSensorChanged(SensorEvent sensorEvent) {
-		if (mServiceBound) {
-			mService.onSensorChanged(sensorEvent);
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == SPEECH_REQUEST_CODE) {
+			try {
+				List<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+				this.enableSelectedExercise(results.get(0));
+			} catch (NullPointerException ignored) {
+			}
 		}
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	@Override
-	public void onAccuracyChanged(Sensor sensor, int i) {
+	public void onPause() {
+		endTask();
+		super.onPause();
+	}
+
+	@Override
+	public void onDestroy() {
+		endTask();
+		super.onDestroy();
+	}
+
+	private void endTask(){
 		if (mServiceBound) {
-			mService.onAccuracyChanged(sensor, i);
+			getActivity().unbindService(mServiceConnection);
+			mServiceBound = false;
 		}
 	}
 

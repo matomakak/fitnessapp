@@ -66,7 +66,7 @@ public class DetectionFragment extends FitnessAppFragment implements View.OnClic
 		y = new ArrayList<>();
 		z = new ArrayList<>();
 		input_signal = new ArrayList<>();
-		activityInference = new ActivityInference(getContext());
+		activityInference = ActivityInference.getInstance(getContext());
 		return super.onCreateView(inflater, container, savedInstanceState);
 	}
 
@@ -127,11 +127,6 @@ public class DetectionFragment extends FitnessAppFragment implements View.OnClic
 				break;
 		}
 		updateValue();
-	}
-
-	@Override
-	public void onAccuracyChanged(Sensor sensor, int i) {
-
 	}
 
 	private void onMotionChanged (float[] values) {

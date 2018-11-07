@@ -9,11 +9,13 @@
     <string name="result_title">RESULT</string>
     <string name="start">Start</string>
     <string name="pause">Pause</string>
+    <string name="stop">Stop</string>
     <string name="restart_current">Reset current</string>
     <string name="restart_all">Restart all</string>
     <string name="forget">Forget last</string>
     <string name="end">End</string>
 
+    <string name="select_exercise">Select exercise</string>
     <string name="record_rep">Record rep</string>
     <string name="complete_rep">Complete rep</string>
     <string name="download_message">Downloading recognition data</string>
@@ -23,7 +25,7 @@
     <string name="backflips">Backflips</string>
     <string name="sideflips">Sideflips</string>
     <string name="cartwheels">Cartwheels</string>
-    <string name="unknown">Unknown</string>
+    <string name="custom">Custom</string>
 
     <string name="reps">reps</string>
     <string name="max_hr">Max:</string>
