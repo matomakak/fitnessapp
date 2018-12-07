@@ -174,11 +174,11 @@ public class MainActivity extends WearableActivity implements
 
 		void executeAction(int pos) {
 			switch (mMainMenu.get(pos).getType()) {
-				case LEARNING:
-					mActiveFragment = 0;
-					updateCurrentFragment();					
-					break;
 				case RECOGNITION:
+					mActiveFragment = 0;
+					updateCurrentFragment();
+					break;
+				case LEARNING:
 					mActiveFragment = 1;
 					updateCurrentFragment();
 					break;

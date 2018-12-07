@@ -40,7 +40,7 @@
     <string name="download_url_labels">http://google.com</string>
     <string name="download_labels">labels.txt</string>
     <string name="download_url_data">http://google.com</string>
-    <string name="download_file">detect.txt</string>
+    <string name="download_file">detect.tflite</string>
     
     <string-array name="recognition">
         <item>Recognition</item>

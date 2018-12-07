@@ -24,7 +24,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 
-public class MotionRecorderService extends Service implements SensorEventListener {
+public class MotionRecordingService extends Service implements SensorEventListener {
 
 	private static final String FILE_NAME = "FITness_recordings.csv";
 	
@@ -99,16 +99,7 @@ public class MotionRecorderService extends Service implements SensorEventListene
 
 	private File getFile() throws FileNotFoundException {
 		if (recordFile == null) {
-			File path = this.getExternalFilesDir(null);
-			if (null == path) {
-				path = this.getFilesDir();
-			}
-			if (!path.exists()){
-				if (!path.mkdirs()){
-					throw new FileNotFoundException();
-				}
-			}
-			recordFile = new File(path.getPath() + File.separator + FILE_NAME);
+			recordFile = Utilities.getFile(this, FILE_NAME);
 		}
 		return recordFile;
 	}
@@ -127,7 +118,6 @@ public class MotionRecorderService extends Service implements SensorEventListene
     
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-		//TODO last 0.7 second filter-out
 		if (recordingStatus == RecordingStatus.RECORDING) {
 			String data = String.format(Locale.ENGLISH,"%s,%d,%f,%f,%f\n",
 				recordingExercise,
@@ -161,8 +151,8 @@ public class MotionRecorderService extends Service implements SensorEventListene
     public void onAccuracyChanged(Sensor sensor, int i) {    }
 	
 	public class LocalBinder extends Binder {
-		public MotionRecorderService getService() {
-			return MotionRecorderService.this;
+		public MotionRecordingService getService() {
+			return MotionRecordingService.this;
 		}
 	}
 	

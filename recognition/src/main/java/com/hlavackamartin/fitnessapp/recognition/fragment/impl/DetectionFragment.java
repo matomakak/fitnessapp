@@ -1,7 +1,10 @@
 package com.hlavackamartin.fitnessapp.recognition.fragment.impl;
 
+import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -13,10 +16,9 @@ import com.hlavackamartin.fitnessapp.recognition.R;
 import com.hlavackamartin.fitnessapp.recognition.Utilities;
 import com.hlavackamartin.fitnessapp.recognition.data.Exercise;
 import com.hlavackamartin.fitnessapp.recognition.data.HeartRateData;
+import com.hlavackamartin.fitnessapp.recognition.data.Recognition;
 import com.hlavackamartin.fitnessapp.recognition.fragment.FitnessAppFragment;
 import com.hlavackamartin.fitnessapp.recognition.provider.ActivityInference;
-
-import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,12 +26,10 @@ import java.util.List;
 import java.util.Map;
 
 import static com.hlavackamartin.fitnessapp.recognition.Utilities.toFloatArray;
-import static java.lang.Math.round;
 
 
-public class DetectionFragment extends FitnessAppFragment implements View.OnClickListener{
-	
-	private TensorFlowInferenceInterface inferenceInterface;
+public class DetectionFragment extends FitnessAppFragment 
+	implements View.OnClickListener, SensorEventListener {
 	
 	private String mSelectedExercise;
 	private ValueType mValueShowing = ValueType.REPS;
@@ -37,17 +37,16 @@ public class DetectionFragment extends FitnessAppFragment implements View.OnClic
 	private TextView mTitle;
 	private TextView mValue;
 
-	private final int N_SAMPLES = 90;
 	private static List<Float> x;
 	private static List<Float> y;
 	private static List<Float> z;
-	private static List<Float> input_signal;
+	private static List<List<Float>> input_signal;
 
 	private ActivityInference activityInference;
 	private Map<String,Exercise> exerciseStats = new HashMap();
 	private HeartRateData heartRateData = new HeartRateData();
 
-	private List<String> mLabels;
+	private int N_SAMPLES = -1;
 
 	@Override
 	public View onCreateView(
@@ -55,8 +54,8 @@ public class DetectionFragment extends FitnessAppFragment implements View.OnClic
 		View rootView = inflater.inflate(R.layout.fragment_detect, container, false);
 
 		mSelectedExercise = "";
-
-		mLabels = Utilities.readRecognitionLabels(getContext());
+		
+		N_SAMPLES = Utilities.readSampleSize(getContext());
 
 		mTitle = rootView.findViewById(R.id.detect_title);
 		mValue = rootView.findViewById(R.id.detect_value);
@@ -67,6 +66,11 @@ public class DetectionFragment extends FitnessAppFragment implements View.OnClic
 		z = new ArrayList<>();
 		input_signal = new ArrayList<>();
 		activityInference = ActivityInference.getInstance(getContext());
+		
+		SensorManager mSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+		Utilities.initializeSensor(this, mSensorManager, Sensor.TYPE_ACCELEROMETER);
+		//Utilities.initializeSensor(this, mSensorManager, Sensor.TYPE_HEART_RATE);
+		
 		return super.onCreateView(inflater, container, savedInstanceState);
 	}
 
@@ -117,6 +121,7 @@ public class DetectionFragment extends FitnessAppFragment implements View.OnClic
 		//TODO implement
 	}
 
+	@Override
 	public void onSensorChanged(SensorEvent sensorEvent) {
 		switch (sensorEvent.sensor.getType()) {
 			case Sensor.TYPE_ACCELEROMETER:
@@ -169,17 +174,22 @@ public class DetectionFragment extends FitnessAppFragment implements View.OnClic
 	private void activityPrediction() {
 		if(x.size() == N_SAMPLES && y.size() == N_SAMPLES && z.size() == N_SAMPLES) {
 			// Copy all x,y and z values to one array of shape N_SAMPLES*3
-			input_signal.addAll(x); input_signal.addAll(y); input_signal.addAll(z);
+			input_signal.add(x); input_signal.add(y); input_signal.add(z);
 			// Perform inference using Tensorflow
-			float[] results = activityInference.getActivityProb(toFloatArray(input_signal));
+			List<Recognition> recognitions = activityInference.getActivityProb(toFloatArray(input_signal));
 
-			for (int i=0; i<mLabels.size(); i++) {
-				if (round(results[i]) > 0.7) {
-					getExerciseStat(mLabels.get(i)).addRep();
+			for (Recognition r : recognitions) {
+				if (r.getConfidence() > 0.7) {
+					getExerciseStat(r.getTitle()).addRep();
 				}
 			}
 			// Clear all the values
-			x.clear(); y.clear(); z.clear(); input_signal.clear();
+			int upperLimit = N_SAMPLES-1;
+			int lowerLimit = upperLimit/2;
+			x = x.subList(lowerLimit, upperLimit);
+			y = y.subList(lowerLimit, upperLimit);
+			z = z.subList(lowerLimit, upperLimit);
+			input_signal.clear();
 		}
 	}
 
@@ -214,4 +224,7 @@ public class DetectionFragment extends FitnessAppFragment implements View.OnClic
 			return vals[(this.ordinal() + 1) % vals.length];
 		}
 	}
+
+	@Override
+	public void onAccuracyChanged(Sensor sensor, int i) {  }
 }

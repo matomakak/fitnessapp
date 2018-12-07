@@ -51,22 +51,18 @@ public class Utilities {
      * @param context activity context
      * @param value value to be saved
      */
-    public static void savePreference(Context context, int value) {
+    public static void savePreference(Context context, String value) {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        if (value < 0) {
-            pref.edit().remove(PREF_KEY).apply();
-        } else {
-            pref.edit().putInt(PREF_KEY, value).apply();
-        }
+        pref.edit().putString(PREF_KEY, value).apply();
     }
     /**
      * Retrieves the value of counter from preference manager. If no value exists, it will return 0.
      * @param context activity context
      * @return saved preference value
      */
-    public static int getPreference(Context context) {
+    public static String getPreference(Context context) {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        return pref.getInt(PREF_KEY, 0);
+        return pref.getString(PREF_KEY, null);
     }
     
     public static boolean isNetworkConnectionAvailable(Context context) {
@@ -77,12 +73,17 @@ public class Utilities {
 		return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
 	}
 
-	public static float[] toFloatArray(List<Float> list) {
+	public static float[][][][] toFloatArray(List<List<Float>> list) {
 		int i = 0;
-		float[] array = new float[list.size()];
+		int j;
+		float[][][][] array = new float[1][1][list.get(0).size()][list.size()];
 
-		for (Float f : list) {
-			array[i++] = (f != null ? f : Float.NaN);
+		for (List<Float> l : list) {
+			j = 0;
+			for (Float f : l) {
+				array[0][0][j++][i] = (f != null ? f : Float.NaN);
+			}
+			i++;
 		}
 		return array;
 	}
@@ -92,6 +93,19 @@ public class Utilities {
 		if (mSensor != null)
 			sensorManager.registerListener(listener, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
 	}
+	
+	public static File getFile(Context context, String fileName) throws FileNotFoundException {
+		File path = context.getExternalFilesDir(null);
+		if (null == path) {
+			path = context.getFilesDir();
+		}
+		if (!path.exists()){
+			if (!path.mkdirs()){
+				throw new FileNotFoundException();
+			}
+		}
+		return new File(path.getPath() + File.separator + fileName);
+	}
 
 
 	public static boolean isExternalStorageWritable() {
@@ -100,21 +114,39 @@ public class Utilities {
 	}
 
 	public static List<String> readRecognitionLabels(Context context) {
+		return readAttributesFile(context,true);
+	}
+
+	public static int readSampleSize(Context context) {
+		List<String> data = readAttributesFile(context,false);
+		for (String config : data) {
+			if (config.startsWith("#SAMPLES#") && config.length() > 9) {
+				try {
+					return Integer.parseInt(config.substring(9));
+				} catch(NumberFormatException nfe) {
+					return -1;
+				}
+			}
+		}
+		return -1;
+	}
+	
+	private static List<String> readAttributesFile(Context context, boolean readLabels) {
 		FileInputStream fstream;
 		try {
-			fstream = new FileInputStream(new File(
-				Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
-				context.getString(R.string.download_labels)));
+			fstream = new FileInputStream(getFile(context,context.getString(R.string.download_labels)));
 		} catch (FileNotFoundException e) {
 			return Collections.emptyList();
 		}
 		BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
-		List<String> labels = new ArrayList<>();
+		List<String> records = new ArrayList<>();
 
 		String strLine;
 		try {
 			while ((strLine = br.readLine()) != null)   {
-				labels.add(strLine);
+				if ((readLabels && !strLine.startsWith("#")) || (!readLabels && strLine.startsWith("#"))) {
+					records.add(strLine);
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -125,6 +157,6 @@ public class Utilities {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return labels;
+		return records;
 	}
 }

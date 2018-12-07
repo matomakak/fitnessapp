@@ -23,7 +23,7 @@ import android.widget.TextView;
 import com.hlavackamartin.fitnessapp.recognition.R;
 import com.hlavackamartin.fitnessapp.recognition.Utilities;
 import com.hlavackamartin.fitnessapp.recognition.fragment.FitnessAppFragment;
-import com.hlavackamartin.fitnessapp.recognition.service.MotionRecorderService;
+import com.hlavackamartin.fitnessapp.recognition.service.MotionRecordingService;
 
 import java.util.List;
 import java.util.Locale;
@@ -42,11 +42,11 @@ public class LearningFragment extends FitnessAppFragment implements
 	private String selectedExercise = "";
 
 	private boolean mServiceBound = false;
-	private MotionRecorderService mService;
+	private MotionRecordingService mService;
 	private ServiceConnection mServiceConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName className, IBinder service) {
-			MotionRecorderService.LocalBinder binder = (MotionRecorderService.LocalBinder) service;
+			MotionRecordingService.LocalBinder binder = (MotionRecordingService.LocalBinder) service;
 			mService = binder.getService();
 			mServiceBound = true;
 		}
@@ -74,7 +74,7 @@ public class LearningFragment extends FitnessAppFragment implements
 			mProgressBar.getIndeterminateDrawable().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
 			mProgressBar.setVisibility(View.GONE);
 			
-			Intent intent = new Intent(getActivity(), MotionRecorderService.class);
+			Intent intent = new Intent(getActivity(), MotionRecordingService.class);
 			getActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
 		}
 		else {
@@ -95,12 +95,12 @@ public class LearningFragment extends FitnessAppFragment implements
 	@Override
 	public void onClick(View view) {
 		if(mButton.isEnabled() && mServiceBound) {
-			MotionRecorderService.RecordingStatus status = 
+			MotionRecordingService.RecordingStatus status = 
 				mService.getRecordingStatus();
-			if (status == MotionRecorderService.RecordingStatus.STOPPED) {
+			if (status == MotionRecordingService.RecordingStatus.STOPPED) {
 				showStartCountDownDialog();
 			}
-			else if (status == MotionRecorderService.RecordingStatus.RECORDING) {
+			else if (status == MotionRecordingService.RecordingStatus.RECORDING) {
 				mService.stopRepRecording();
 				indicateRepProcessing(false);
 				showRepCountPickerDialog();
