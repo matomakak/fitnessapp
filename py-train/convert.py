@@ -4,16 +4,15 @@ import warnings
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
-import os
 import argparse
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats, signal
 import tensorflow as tf
+
 tf.logging.set_verbosity(tf.logging.ERROR)
 from math import ceil
-
 
 # %matplotlib inline
 # plt.style.use('ggplot')
@@ -23,19 +22,79 @@ parser.add_argument("-i", "--input", dest="input", help="CSV formatted file", me
 parser.add_argument("-o", "--output", dest="output", help="Trained neuron network prefix name", metavar="FILE")
 parser.add_argument("-v", "--visualize", dest="visualize", help="Show plots of each recorded exercise",
                     action="store_true", default=False)
+parser.add_argument("--image", dest="image", help="Show image of each recorded exercise chunk",
+                    action="store_true", default=False)
 parser.add_argument("-c", "--chunks", dest="chunks", help="Show plots of each recorded chunk of exercise",
                     action="store_true", default=False)
+parser.add_argument("-f", "--fourier", dest="fourier", help="Show plots of each DFT used for period estimation",
+                    action="store_true", default=False)
 args = parser.parse_args()
-if args.visualize is False and args.output is None:
+if args.visualize is False and args.output is None and args.image is False:
     parser.error('-o is required when -v is not set.')
 if args.chunks is True and args.visualize is False:
     parser.error('-v is required when -c is set.')
+if args.fourier is True and args.visualize is False:
+    parser.error('-v is required when -f is set.')
 
 
 def feature_normalize(to_normalize):
     mu = np.mean(to_normalize, axis=0)
     sigma = np.std(to_normalize, axis=0)
     return (to_normalize - mu) / sigma
+
+
+def plot_axis(ax, x, y, title):
+    ax.plot(x, y)
+    ax.set_title(title)
+    ax.xaxis.set_visible(False)
+    ax.set_ylim([min(y) - np.std(y), max(y) + np.std(y)])
+    ax.set_xlim([min(x), max(x)])
+    ax.grid(True)
+
+
+def plot_activity(name, x, y, z):
+    fig, (ax0, ax1, ax2) = plt.subplots(nrows=3, figsize=(15, 10), sharex=True)
+    length = len(x)
+    plot_axis(ax0, range(length), x, 'x-axis')
+    plot_axis(ax1, range(length), y, 'y-axis')
+    plot_axis(ax2, range(length), z, 'z-axis')
+    plt.subplots_adjust(hspace=0.2)
+    fig.suptitle(name)
+    plt.subplots_adjust(top=0.90)
+    plt.show()
+
+
+def plot_fft(name, X, idx, Y, idy, Z, idz):
+    lngth = X.size
+    W_x = np.fft.fft(X)
+    W_y = np.fft.fft(Y)
+    W_z = np.fft.fft(Z)
+    freq = np.fft.fftfreq(X.size, 1)
+    x = 1.0 / freq[:ceil(X.size / 2)]
+
+    fig, (ax, ay, az) = plt.subplots(nrows=3, figsize=(15, 10), sharex=True)
+
+    ax.set_title('x-axis')
+    ax.yaxis.set_visible(False)
+    ax.set_xlim(0, 80)
+    # plt.ylim(0, np.nanmax(x[x != np.inf]))
+    ax.plot(lngth / x, abs(W_x[:ceil(lngth / 2)]))
+    ax.scatter([lngth / (1 / abs(freq[idx])), ], [np.abs(W_x[idx]), ], s=100, color='r')
+
+    ay.set_title('y-axis')
+    ay.yaxis.set_visible(False)
+    ay.set_xlim(0, 80)
+    ay.plot(lngth / x, abs(W_y[:ceil(lngth / 2)]))
+    ay.scatter([lngth / (1 / abs(freq[idy])), ], [np.abs(W_y[idy]), ], s=100, color='r')
+
+    az.set_title('z-axis')
+    az.yaxis.set_visible(False)
+    az.set_xlim(0, 80)
+    az.plot(lngth / x, abs(W_z[:ceil(lngth / 2)]))
+    az.scatter([lngth / (1 / abs(freq[idz])), ], [np.abs(W_z[idz]), ], s=100, color='r')
+
+    plt.subplots_adjust(hspace=0.4)
+    plt.show()
 
 
 def estimate_period(df):
@@ -45,10 +104,13 @@ def estimate_period(df):
 
     freq = np.fft.fftfreq(X.size, 1)
     # Look for the longest signal that is "loud"
-    threshold = 10 ** 2
+    threshold = 100
     idx = np.where(abs(np.fft.fft(X)) > threshold)[0][-1]
     idy = np.where(abs(np.fft.fft(Y)) > threshold)[0][-1]
     idz = np.where(abs(np.fft.fft(Z)) > threshold)[0][-1]
+
+    if args.fourier:
+        plot_fft(df["activity"].iloc[0], X, idx, Y, idy, Z, idz)
 
     estimations = [X.size / (1 / abs(freq[idx])), Y.size / (1 / abs(freq[idy])), Z.size / (1 / abs(freq[idz]))]
     est_filtered = [x for x in estimations if 3 < x < 21]
@@ -60,16 +122,16 @@ def filter_and_estimate(data):
     filtered_activities = dict()
     indexes = data.ne(data.shift()).apply(lambda x: x.index[x].tolist()).values[0]
     for i in range(len(indexes)):
-        start = 0 if i == 0 else indexes[i]+1
-        if i+1 < len(indexes):
-            end = indexes[i+1]
+        start = 0 if i == 0 else indexes[i] + 1
+        if i + 1 < len(indexes):
+            end = indexes[i + 1]
         else:
             end = -1
         exercise = data.iloc[start:end]
         filtered = exercise[
             (exercise['timestamp'] < (exercise.iloc[-1]['timestamp'] - 2700)) &
             (exercise['timestamp'] > (exercise.iloc[0]['timestamp'] + 300))
-        ]
+            ]
         estimated_periods = estimate_period(filtered)
         estimation = 0 if estimated_periods < 1 else estimated_periods
         max_est = 1 if estimated_periods < 1 else ceil(len(filtered) / estimated_periods)
@@ -91,34 +153,37 @@ def read_data_and_filter(file_path):
     return filter_and_estimate(data)
 
 
-def plot_axis(ax, x, y, title):
-    ax.plot(x, y)
-    ax.set_title(title)
-    ax.xaxis.set_visible(False)
-    ax.set_ylim([min(y) - np.std(y), max(y) + np.std(y)])
-    ax.set_xlim([min(x), max(x)])
-    ax.grid(True)
-
-
-def plot_activity(activity, data_set):
-    fig, (ax0, ax1, ax2) = plt.subplots(nrows=3, figsize=(15, 10), sharex=True)
-    length = len(data_set['x-axis'])
-    plot_axis(ax0, range(length), data_set['x-axis'], 'x-axis')
-    plot_axis(ax1, range(length), data_set['y-axis'], 'y-axis')
-    plot_axis(ax2, range(length), data_set['z-axis'], 'z-axis')
-    plt.subplots_adjust(hspace=0.2)
-    fig.suptitle(activity)
-    plt.subplots_adjust(top=0.90)
-    plt.show()
-
-
 def plot_activities_and_exit(max_len, filtered):
     for activity, (filtered, estimation) in filtered.items():
-        plot_activity(activity, filtered)
+        plot_activity(activity, filtered['x-axis'], filtered['y-axis'], filtered['z-axis'])
         chunks = estimation if estimation > 0 else ceil(len(filtered) / max_len)
         if args.chunks:
             for chunk in np.array_split(filtered, chunks):
-                plot_activity(activity, chunk)
+                plot_activity(activity, chunk['x-axis'], chunk['y-axis'], chunk['z-axis'])
+    exit(0)
+
+
+def plot_images_and_exit(length, activities):
+    segments, labels = segment_signal(ceil(np.sqrt(length)) ** 2, activities)
+
+    f = lambda x: np.abs(x)
+    segments = f(segments)
+    f1 = lambda x: x / np.max(x) * 255
+
+    fig = plt.figure(figsize=(11, 11))
+    columns = int(np.sqrt(segments.shape[0]))
+    rows = ceil(segments.shape[0] / columns)
+
+    ax = []
+    for j in range(segments.shape[0]):
+        segments[j] = f1(segments[j])
+        img = segments[j].reshape(11, 11, 3).astype(np.uint8)
+        ax.append(fig.add_subplot(rows, columns, j + 1))
+        ax[-1].set_title(labels[j])
+        ax[-1].axis('off')
+        plt.imshow(img)
+
+    plt.show()
     exit(0)
 
 
@@ -141,12 +206,22 @@ def segment_signal(max_len, filtered_activities):
 
 length, activities = read_data_and_filter(args.input)
 
+if args.image:
+    plot_images_and_exit(length, activities)
+
 if args.visualize:
     plot_activities_and_exit(length, activities)
 
 segments, labels = segment_signal(length, activities)
-train_x = segments.reshape(len(segments), 1, length, 3)
-train_y = np.asarray(pd.get_dummies(labels), dtype=np.int8)
+reshaped = segments.reshape(len(segments), 1, length, 3)
+labels = np.asarray(pd.get_dummies(labels), dtype=np.int8)
+
+train_test_split = np.random.rand(len(reshaped)) < 0.70
+train_x = reshaped[train_test_split]
+train_y = labels[train_test_split]
+test_x = reshaped[~train_test_split]
+test_y = labels[~train_test_split]
+
 MODEL_NAME = "./" + args.output
 
 
@@ -214,9 +289,9 @@ with tf.Session() as session:
             batch_x = train_x[offset:(offset + batch_size), :, :, :]
             batch_y = train_y[offset:(offset + batch_size), :]
             _, c = session.run([optimizer, loss], feed_dict={X: batch_x, Y: batch_y})
-        print("Epoch: ", epoch+1, " Training Loss: ", c, " Training Accuracy: ",
+        print("Epoch: ", epoch + 1, " Training Loss: ", c, " Training Accuracy: ",
               session.run(accuracy, feed_dict={X: train_x, Y: train_y}))
-    # print("Testing Accuracy:", session.run(accuracy, feed_dict={X: test_x, Y: test_y}))
+    print("Testing Accuracy:", session.run(accuracy, feed_dict={X: test_x, Y: test_y}))
     # tf.train.write_graph(session.graph_def, '.', "Users/Martin/Desktop/model.pbtxt", as_text=True)
     # saver.save(session, save_path="Users/Martin/Desktop/model.ckpt")
     converter = tf.contrib.lite.TFLiteConverter.from_session(session, [X], [y_])
@@ -224,13 +299,12 @@ with tf.Session() as session:
     open(MODEL_NAME + ".tflite", "wb").write(tflite_model)
 
 exit(0)
-############################################
+
 ############################################
 # #FREEZING AND RECOVERING + SAVING GRAPH# #
 ############################################
-############################################
+
 from tensorflow.python.tools import freeze_graph
-from tensorflow.python.tools import optimize_for_inference_lib
 
 input_graph_path = MODEL_NAME + '.pbtxt'
 checkpoint_path = MODEL_NAME + '.ckpt'
