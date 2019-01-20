@@ -54,7 +54,7 @@ public class MainActivity extends WearableActivity implements
 		
 		mFragments.add(new DetectionFragment());
 		mFragments.add(new LearningFragment());
-		mActiveFragment = 1;
+		mActiveFragment = 0;
 		updateCurrentFragment();
 		
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -183,11 +183,8 @@ public class MainActivity extends WearableActivity implements
 					updateCurrentFragment();
 					break;
 				case SYNC:
+					//mWearableActionDrawer.
 					mContext.executeSyncTask();
-					break;
-				case EXIT:
-					//TODO finish only or show some summary?
-					mContext.finish();
 					break;
 			}
 		}

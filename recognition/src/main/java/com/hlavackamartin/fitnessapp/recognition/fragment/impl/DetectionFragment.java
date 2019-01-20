@@ -195,7 +195,7 @@ public class DetectionFragment extends FitnessAppFragment
 
 	private Exercise getExerciseStat(String name) {
 		Exercise stat = exerciseStats.get(name);
-		if (stat != null) {
+		if (stat == null) {
 			stat = new Exercise(name);
 			exerciseStats.put(name, stat);
 		}

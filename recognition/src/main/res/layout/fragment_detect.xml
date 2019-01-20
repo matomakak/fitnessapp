@@ -14,7 +14,8 @@
         android:textSize="15sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#ffffff"/>
+        android:textColor="#ffffff"
+        android:text="Squats"/>
 
     <TextView
         android:id="@+id/detect_value"

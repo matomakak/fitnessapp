@@ -44,18 +44,14 @@
     
     <string-array name="recognition">
         <item>Recognition</item>
-        <item>ic_v_white_48dp</item>
+        <item>ic_detect_white_48dp</item>
     </string-array>
     <string-array name="learning">
         <item>Learning</item>
-        <item>ic_e_white_48dp</item>
+        <item>ic_record_white_48dp</item>
     </string-array>
     <string-array name="sync">
         <item>Sync</item>
         <item>ic_m_white_48dp</item>
-    </string-array>
-    <string-array name="exit">
-        <item>Exit</item>
-        <item>ic_j_white_48dp</item>
     </string-array>
 </resources>

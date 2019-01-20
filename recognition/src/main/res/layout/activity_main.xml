@@ -19,14 +19,17 @@
         android:id="@+id/top_nav"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/grey"/>
+        android:background="@color/grey"
+        app:navigationStyle="multiPage"
+        />
 
     <android.support.wear.widget.drawer.WearableActionDrawerView
         android:id="@+id/bottom_nav"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/grey"
-        app:showOverflowInPeek="true" />
+        app:showOverflowInPeek="true"
+        />
     
 </android.support.wear.widget.drawer.WearableDrawerLayout>
 
