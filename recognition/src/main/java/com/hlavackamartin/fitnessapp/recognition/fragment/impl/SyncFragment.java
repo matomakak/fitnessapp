@@ -31,17 +31,21 @@ public class SyncFragment extends FitnessAppFragment implements
 
 		mTitle = rootView.findViewById(R.id.sync_title);
 		mButton = rootView.findViewById(R.id.sync_btn);
+		mButton.setOnClickListener(this);
 
+		return rootView;
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
 		if (Utilities.isExternalStorageWritable()) {
 			mTitle.setText(R.string.sync);
-			mButton.setOnClickListener(this);
 			mButton.setEnabled(true);
 		} else {
 			mTitle.setText(R.string.error__no_storage);
 			mButton.setEnabled(false);
 		}
-
-		return rootView;
 	}
 
 	@Override
@@ -58,8 +62,8 @@ public class SyncFragment extends FitnessAppFragment implements
 			type == SynchronizeTask.SyncActionType.UPLOAD ? R.string.upload_message : R.string.download_message
 		));
 		mProgressDialog.setIndeterminate(true);
-		mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-		mProgressDialog.setCancelable(true);
+		mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		mProgressDialog.setCancelable(false);
 		return mProgressDialog;
 	}
 
@@ -77,29 +81,29 @@ public class SyncFragment extends FitnessAppFragment implements
 		uploadTask.execute();
 	}
 
-
 	@Override
 	public List<String> getActionMenu(Resources resources) {
 		return null;
 	}
 
 	@Override
-	public void onEnterAmbient(Bundle bundle) {
+	public boolean onMenuItemClick(MenuItem menuItem) {
+		return false;
+	}
 
+	@Override
+	public void onEnterAmbient(Bundle bundle) {
+		//TODO implement
 	}
 
 	@Override
 	public void onUpdateAmbient() {
-
+		//TODO implement
 	}
 
 	@Override
 	public void onExitAmbient() {
-
+		//TODO implement
 	}
 
-	@Override
-	public boolean onMenuItemClick(MenuItem menuItem) {
-		return false;
-	}
 }

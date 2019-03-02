@@ -49,13 +49,13 @@ public class MotionRecordingService extends Service implements SensorEventListen
 
 	@Override
 	public boolean onUnbind(Intent intent) {
+		mSensorManager.unregisterListener(this);
 		getWriter().ifPresent(w -> {
 			try {
 				w.flush();
 			} catch (IOException ignored) {
 			}
 		});
-		mSensorManager.unregisterListener(this);
 		return super.onUnbind(intent);
 	}
 
@@ -73,17 +73,16 @@ public class MotionRecordingService extends Service implements SensorEventListen
 		return false;
 	}
 
-	public void setRepsForFinishedRecording(Integer reps) {
-		if (recordingStatus == RecordingStatus.WAITING_FOR_REPS) {
-			getWriter().ifPresent(w -> {
-				try {
-					//FIXME temporary solution
-					//w.write(String.format(Locale.ENGLISH, "#reps,%d,0,0,0\n\n", reps).getBytes());
-					w.flush();
-					recordingStatus = RecordingStatus.STOPPED;
-				} catch (IOException ignored) {
+	public void setRepsForFinishedRecording(int reps) {
+		if (recordingStatus == RecordingStatus.WAITING_FOR_REPS && writer != null) {
+			try {
+				if (reps != 0) {
+					writer.write(String.format(Locale.ENGLISH, "#reps,%d,0,0,0\n\n", reps).getBytes());
 				}
-			});
+				writer.flush();
+				recordingStatus = RecordingStatus.STOPPED;
+			} catch (IOException ignored) {
+			}
 		}
 	}
 
@@ -114,10 +113,12 @@ public class MotionRecordingService extends Service implements SensorEventListen
 	}
 
 	private void loadWriter() {
-		try {
-			writer = new FileOutputStream(getFile(), true);
-		} catch (FileNotFoundException e) {
-			writer = null;
+		if (writer == null) {
+			try {
+				writer = new FileOutputStream(getFile(), true);
+			} catch (FileNotFoundException e) {
+				writer = null;
+			}
 		}
 	}
 	
@@ -127,7 +128,7 @@ public class MotionRecordingService extends Service implements SensorEventListen
     
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-		if (recordingStatus == RecordingStatus.RECORDING) {
+		if (recordingStatus == RecordingStatus.RECORDING && writer != null) {
 			String data = String.format(Locale.ENGLISH,"%s,%d,%f,%f,%f\n",
 				recordingExercise,
 				System.currentTimeMillis(),
@@ -135,13 +136,11 @@ public class MotionRecordingService extends Service implements SensorEventListen
 				sensorEvent.values[1],
 				sensorEvent.values[2]
 			);
-			getWriter().ifPresent(w -> {
-				try {
-					writer.write(data.getBytes());
-				} catch (IOException ignored) {
-					//TODO
-				}
-			});
+			try {
+				writer.write(data.getBytes());
+			} catch (IOException ignored) {
+				//TODO
+			}
 		}
     }
 

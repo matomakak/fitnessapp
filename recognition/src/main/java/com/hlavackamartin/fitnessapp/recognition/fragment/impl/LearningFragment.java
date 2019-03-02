@@ -32,10 +32,10 @@ import java.util.List;
 import java.util.Locale;
 
 
-public class LearningFragment extends FitnessAppFragment implements 
+public class LearningFragment extends FitnessAppFragment implements
 	View.OnClickListener,
 	NumberPicker.OnValueChangeListener {
-	
+
 	private static final int SPEECH_REQUEST_CODE = 1;
 
 	private TextView mTitle;
@@ -43,8 +43,6 @@ public class LearningFragment extends FitnessAppFragment implements
 	private ProgressBar mProgressBar;
 
 	private String selectedExercise = "";
-	private int selectedExerciseIdx;
-	private String[] exerciseList;
 
 	private boolean mServiceBound = false;
 	private MotionRecordingService mService;
@@ -55,14 +53,13 @@ public class LearningFragment extends FitnessAppFragment implements
 			mService = binder.getService();
 			mServiceBound = true;
 		}
+
 		@Override
 		public void onServiceDisconnected(ComponentName arg0) {
 			mServiceBound = false;
 		}
 	};
-	
-	public LearningFragment() {}
-	
+
 	@Override
 	public View onCreateView(
 		LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -70,58 +67,61 @@ public class LearningFragment extends FitnessAppFragment implements
 
 		mTitle = rootView.findViewById(R.id.learn_title);
 		mButton = rootView.findViewById(R.id.learn_btn);
-		mButton.setEnabled(false);
+		mProgressBar = rootView.findViewById(R.id.learn_progressBar);
+		mProgressBar.getIndeterminateDrawable().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
+		mProgressBar.setVisibility(View.GONE);
 
-		if (Utilities.isExternalStorageWritable()) {
-			mTitle.setText(R.string.select_exercise);
-			mButton.setOnClickListener(this);
-			mProgressBar = rootView.findViewById(R.id.learn_progressBar);
-			mProgressBar.getIndeterminateDrawable().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
-			mProgressBar.setVisibility(View.GONE);
-			
-			Intent intent = new Intent(getActivity(), MotionRecordingService.class);
-			getActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
-		}
-		else {
-			mTitle.setText(R.string.error__no_storage);
-		}
-
-		exerciseList = getResources().getStringArray(R.array.movements);
-		selectedExerciseIdx = exerciseList.length - 1;
+		mTitle.setText(Utilities.isExternalStorageWritable() ?
+			R.string.select_exercise : R.string.error__no_storage);
+		mButton.setOnClickListener(this);
 
 		return rootView;
 	}
 
+	@Override
+	public void onResume() {
+		super.onResume();
+		mButton.setEnabled(false);
+		if (Utilities.isExternalStorageWritable()) {
+			if (selectedExercise != null && !selectedExercise.isEmpty()) {
+				mButton.setEnabled(mServiceBound);
+				mTitle.setText(selectedExercise);
+			}
+			if (!mServiceBound) {
+				Intent intent = new Intent(getActivity(), MotionRecordingService.class);
+				getActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+			}
+		}
+	}
+
 	private void enableSelectedExercise(String name) {
-		this.selectedExercise = name;
-		this.mTitle.setText(selectedExercise);
+		selectedExercise = name;
+		mTitle.setText(selectedExercise);
 		if (mButton != null) {
-			mButton.setEnabled(Utilities.isExternalStorageWritable());
+			mButton.setEnabled(Utilities.isExternalStorageWritable() && mServiceBound);
 		}
 	}
 
 	@Override
 	public void onClick(View view) {
-		if(mButton.isEnabled() && mServiceBound) {
-			MotionRecordingService.RecordingStatus status = 
-				mService.getRecordingStatus();
+		if (mButton.isEnabled() && mServiceBound) {
+			MotionRecordingService.RecordingStatus status = mService.getRecordingStatus();
 			if (status == MotionRecordingService.RecordingStatus.STOPPED) {
 				showStartCountDownDialog();
-			}
-			else if (status == MotionRecordingService.RecordingStatus.RECORDING) {
+			} else if (status == MotionRecordingService.RecordingStatus.RECORDING) {
 				mService.stopRepRecording(true);//FIXME temporary solution
-				indicateRepProcessing(false);
+				this.indicateRepProcessing(false);
 				//showRepCountPickerDialog(); //FIXME temporary solution
 			}
 		}
 	}
-	
+
 	public void showRepCountPickerDialog() {
 		NumberPickerDialog newFragment = new NumberPickerDialog();
 		newFragment.setValueChangeListener(this);
 		newFragment.show(getFragmentManager(), "rep count");
 	}
-	
+
 	public void showStartCountDownDialog() {
 		AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
 		alertDialog.setTitle("Start in");
@@ -145,25 +145,24 @@ public class LearningFragment extends FitnessAppFragment implements
 	}
 
 	public void startRecording() {
-		indicateRepProcessing(true);
-		if (this.mService.startRepRecording(this.selectedExercise)) {
+		this.indicateRepProcessing(true); //To show animation as soon as possible
+		if (mService.startRepRecording(selectedExercise)) {
 			Utilities.vibrate(getActivity(), null);
-		} 
-		else {
-			indicateRepProcessing(false);
+		} else {
+			this.indicateRepProcessing(false);
 		}
 	}
 
-	public void indicateRepProcessing(boolean processing){
-		if (this.mProgressBar != null) {
-			this.mProgressBar.setVisibility(processing ? View.VISIBLE : View.GONE);
+	public void indicateRepProcessing(boolean processing) {
+		if (mProgressBar != null) {
+			mProgressBar.setVisibility(processing ? View.VISIBLE : View.GONE);
 		}
-		if (this.mButton != null) {
+		if (mButton != null) {
 			mButton.setSelected(processing);
 			mButton.setPressed(processing);
 		}
-		if (this.mTitle != null) {
-			this.mTitle.setText(processing ? getString(R.string.complete_rep) : selectedExercise );
+		if (mTitle != null) {
+			mTitle.setText(processing ? getString(R.string.complete_rep) : selectedExercise);
 		}
 	}
 
@@ -171,7 +170,7 @@ public class LearningFragment extends FitnessAppFragment implements
 	public void onValueChange(NumberPicker numberPicker, int i, int i1) {
 		//AFTER NUMBER PICKER DIALOG
 		if (mServiceBound) {
-			this.mService.setRepsForFinishedRecording(numberPicker.getValue());
+			mService.setRepsForFinishedRecording(numberPicker.getValue());
 		}
 	}
 
@@ -223,7 +222,7 @@ public class LearningFragment extends FitnessAppFragment implements
 		super.onDestroy();
 	}
 
-	private void endTask(){
+	private void endTask() {
 		if (mServiceBound) {
 			getActivity().unbindService(mServiceConnection);
 			mServiceBound = false;

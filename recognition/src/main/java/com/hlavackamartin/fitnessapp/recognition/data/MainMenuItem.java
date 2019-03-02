@@ -1,8 +1,5 @@
 package com.hlavackamartin.fitnessapp.recognition.data;
 
-/**
- * Created by Martin on 18.10.2018.
- */
 
 public class MainMenuItem {
 	private MenuType type;
@@ -28,27 +25,24 @@ public class MainMenuItem {
 	}
 
 	public enum MenuType {
-		RECOGNITION("recognition"),
-		LEARNING("learning"),
-		SYNC("sync");
-		
-		private final String name;
+		RECOGNITION("recognition", 0),
+		LEARNING("learning", 1),
+		SYNC("sync", 2);
 
-		MenuType(String name) {
+		private final String name;
+		private final int pos;
+
+		MenuType(String name, int pos) {
 			this.name = name;
+			this.pos = pos;
 		}
-		
+
 		public String getName() {
 			return this.name;
 		}
-		
-		/*public static MenuType getByName(String name) {
-			for (MenuType type : values()) {
-				if (type.name.equals(name)) {
-					return type;
-				}
-			}
-			return null;
-		}*/
+
+		public int getPos() {
+			return pos;
+		}
 	}
 }

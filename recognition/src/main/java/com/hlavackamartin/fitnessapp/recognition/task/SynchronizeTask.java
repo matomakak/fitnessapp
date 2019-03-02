@@ -31,7 +31,6 @@ public class SynchronizeTask {
 	public SynchronizeTask(Context activity, ProgressDialog dialog, SyncActionType type) {
 		this.context = activity;
 		this.dialog = dialog;
-		this.dialog.setIndeterminate(true);
 		this.type = type;
 	}
 
@@ -46,11 +45,9 @@ public class SynchronizeTask {
 					onPostExecute("No file to upload found");
 					return;
 				}
-				//dialog.setMax((int) file.length());
 				uploadData(file);
 				break;
 			case DOWNLOAD:
-				dialog.setMax(100);
 				downloadData();
 				break;
 			default:
@@ -84,8 +81,7 @@ public class SynchronizeTask {
 		// take CPU lock to prevent CPU from going off if the user 
 		// presses the power button during download
 		PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-		mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-			getClass().getName());
+		mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
 		mWakeLock.acquire();
 		dialog.show();
 	}

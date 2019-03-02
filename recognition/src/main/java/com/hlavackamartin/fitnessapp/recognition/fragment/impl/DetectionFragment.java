@@ -26,8 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.hlavackamartin.fitnessapp.recognition.Utilities.toFloatArray;
+import java.util.Optional;
 
 
 public class DetectionFragment extends FitnessAppFragment 
@@ -45,7 +44,7 @@ public class DetectionFragment extends FitnessAppFragment
 	private static List<List<Float>> input_signal;
 
 	private ActivityInference activityInference = null;
-	private Map<String,Exercise> exerciseStats = new HashMap();
+	private Map<String, Exercise> exerciseStats = new HashMap<>();
 	private HeartRateData heartRateData = new HeartRateData();
 
 	private int N_SAMPLES = -1;
@@ -54,10 +53,6 @@ public class DetectionFragment extends FitnessAppFragment
 	public View onCreateView(
 		LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View rootView = inflater.inflate(R.layout.fragment_detect, container, false);
-
-		mSelectedExercise = "";
-		
-		N_SAMPLES = Utilities.readSampleSize(getContext());
 
 		mTitle = rootView.findViewById(R.id.detect_title);
 		mValue = rootView.findViewById(R.id.detect_value);
@@ -77,6 +72,13 @@ public class DetectionFragment extends FitnessAppFragment
 	}
 
 	@Override
+	public void onResume() {
+		super.onResume();
+		N_SAMPLES = Utilities.readSampleSize(getContext());
+		mSelectedExercise = "";
+	}
+
+	@Override
 	public void onClick(View view) {
 		mValueShowing = mValueShowing.next();
 		updateValue();
@@ -91,36 +93,13 @@ public class DetectionFragment extends FitnessAppFragment
 	public boolean onMenuItemClick(MenuItem menuItem) {
 		switch (menuItem.getItemId()) {
 			case R.id.reset_current:
-				executeReset();
+				Optional.of(exerciseStats.get(mSelectedExercise)).ifPresent(Exercise::clearStats);
 				break;
 			case R.id.reset_all:
-				executeResetAll();
+				exerciseStats.clear();
 				break;
 		}
 		return true;
-	}
-
-	private void executeReset() {
-		exerciseStats.get(mSelectedExercise).clearStats();
-	}
-
-	private void executeResetAll() {
-		exerciseStats.clear();
-	}
-
-	@Override
-	public void onEnterAmbient(Bundle bundle) {
-		//TODO implement
-	}
-
-	@Override
-	public void onUpdateAmbient() {
-		//TODO implement
-	}
-
-	@Override
-	public void onExitAmbient() {
-		//TODO implement
 	}
 
 	@Override
@@ -137,10 +116,10 @@ public class DetectionFragment extends FitnessAppFragment
 	}
 
 	private void onMotionChanged (float[] values) {
-		activityPrediction();
 		x.add(values[0]);
 		y.add(values[1]);
 		z.add(values[2]);
+		activityPrediction();
 	}
 
 	private void onHeartRateChanged (int tHearRate) {
@@ -148,7 +127,6 @@ public class DetectionFragment extends FitnessAppFragment
 	}
 
 	private void updateValue() {
-		Exercise exercise = exerciseStats.get(mSelectedExercise);
 		String title = mValueShowing.getName();
 		String value = "...";
 		switch (mValueShowing) {
@@ -163,6 +141,7 @@ public class DetectionFragment extends FitnessAppFragment
 				value = heartRateData.getMaxHR().toString();
 				break;
 			case REPS:
+				Exercise exercise = exerciseStats.get(mSelectedExercise);
 				if (exercise != null) {
 					title = exercise.getName();
 					value = exercise.getReps().toString();
@@ -174,20 +153,29 @@ public class DetectionFragment extends FitnessAppFragment
 	}
 
 	private void activityPrediction() {
-		if(x.size() == N_SAMPLES && y.size() == N_SAMPLES && z.size() == N_SAMPLES) {
+		if (x.size() >= N_SAMPLES && y.size() >= N_SAMPLES && z.size() >= N_SAMPLES) {
+			if (x.size() > N_SAMPLES) {
+				x.subList(N_SAMPLES, x.size()).clear();
+				y.subList(N_SAMPLES, y.size()).clear();
+				z.subList(N_SAMPLES, z.size()).clear();
+			}
 			// Copy all x,y and z values to one array of shape N_SAMPLES*3
 			input_signal.add(x); input_signal.add(y); input_signal.add(z);
 			// Perform inference using Tensorflow
 			if (activityInference != null) {
-				List<Recognition> recognitions = activityInference.getActivityProb(toFloatArray(input_signal));
+				List<Recognition> recognitions =
+					activityInference.getActivityProb(Utilities.toFloatArray(input_signal));
 
 				for (Recognition r : recognitions) {
 					if (r.getConfidence() > 0.7) {
 						getExerciseStat(r.getTitle()).addRep();
+						mSelectedExercise = r.getTitle();
+						updateValue();
+						break;
 					}
 				}
 			}
-			// Clear all the values
+			// Clear half of the values
 			int upperLimit = N_SAMPLES-1;
 			int lowerLimit = upperLimit/2;
 			x = x.subList(lowerLimit, upperLimit);
@@ -198,12 +186,7 @@ public class DetectionFragment extends FitnessAppFragment
 	}
 
 	private Exercise getExerciseStat(String name) {
-		Exercise stat = exerciseStats.get(name);
-		if (stat == null) {
-			stat = new Exercise(name);
-			exerciseStats.put(name, stat);
-		}
-		return stat;
+		return exerciseStats.computeIfAbsent(name, Exercise::new);
 	}
 
 	public enum ValueType {
@@ -231,4 +214,19 @@ public class DetectionFragment extends FitnessAppFragment
 
 	@Override
 	public void onAccuracyChanged(Sensor sensor, int i) {  }
+
+	@Override
+	public void onEnterAmbient(Bundle bundle) {
+		//TODO implement
+	}
+
+	@Override
+	public void onUpdateAmbient() {
+		//TODO implement
+	}
+
+	@Override
+	public void onExitAmbient() {
+		//TODO implement
+	}
 }
