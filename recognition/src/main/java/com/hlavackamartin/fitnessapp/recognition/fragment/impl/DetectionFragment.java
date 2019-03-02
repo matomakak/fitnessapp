@@ -1,6 +1,7 @@
 package com.hlavackamartin.fitnessapp.recognition.fragment.impl;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -21,6 +22,7 @@ import com.hlavackamartin.fitnessapp.recognition.fragment.FitnessAppFragment;
 import com.hlavackamartin.fitnessapp.recognition.provider.ActivityInference;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +44,7 @@ public class DetectionFragment extends FitnessAppFragment
 	private static List<Float> z;
 	private static List<List<Float>> input_signal;
 
-	private ActivityInference activityInference;
+	private ActivityInference activityInference = null;
 	private Map<String,Exercise> exerciseStats = new HashMap();
 	private HeartRateData heartRateData = new HeartRateData();
 
@@ -65,10 +67,10 @@ public class DetectionFragment extends FitnessAppFragment
 		y = new ArrayList<>();
 		z = new ArrayList<>();
 		input_signal = new ArrayList<>();
-		activityInference = ActivityInference.getInstance(getContext());
+		//activityInference = ActivityInference.getInstance(getContext());
 		
 		SensorManager mSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
-		Utilities.initializeSensor(this, mSensorManager, Sensor.TYPE_ACCELEROMETER);
+		//Utilities.initializeSensor(this, mSensorManager, Sensor.TYPE_ACCELEROMETER);
 		//Utilities.initializeSensor(this, mSensorManager, Sensor.TYPE_HEART_RATE);
 		
 		return super.onCreateView(inflater, container, savedInstanceState);
@@ -81,8 +83,8 @@ public class DetectionFragment extends FitnessAppFragment
 	}
 
 	@Override
-	public int getActionMenu() {
-		return R.menu.action_type_menu;
+	public List<String> getActionMenu(Resources resources) {
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -176,11 +178,13 @@ public class DetectionFragment extends FitnessAppFragment
 			// Copy all x,y and z values to one array of shape N_SAMPLES*3
 			input_signal.add(x); input_signal.add(y); input_signal.add(z);
 			// Perform inference using Tensorflow
-			List<Recognition> recognitions = activityInference.getActivityProb(toFloatArray(input_signal));
+			if (activityInference != null) {
+				List<Recognition> recognitions = activityInference.getActivityProb(toFloatArray(input_signal));
 
-			for (Recognition r : recognitions) {
-				if (r.getConfidence() > 0.7) {
-					getExerciseStat(r.getTitle()).addRep();
+				for (Recognition r : recognitions) {
+					if (r.getConfidence() > 0.7) {
+						getExerciseStat(r.getTitle()).addRep();
+					}
 				}
 			}
 			// Clear all the values

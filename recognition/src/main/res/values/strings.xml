@@ -18,6 +18,7 @@
     <string name="select_exercise">Select exercise</string>
     <string name="record_rep">Record rep</string>
     <string name="complete_rep">Complete rep</string>
+    <string name="sync">Synchronization</string>
     <string name="download_message">Downloading recognition data</string>
     <string name="upload_message">Uploading recognition data</string>
 
@@ -35,13 +36,23 @@
     <string name="sync_fail">Sync failed: </string>
     <string name="sync_succes">Detection data synced</string>
 
-    <string name="upload_file">upload.txt</string>
-    <string name="upload_url">http://google.com</string>
-    <string name="download_url_labels">http://google.com</string>
+    <string name="upload_file">recordings.csv</string>
+    <string name="upload_url">http://www.stud.fit.vutbr.cz/~xhlava39/DP/</string>
+    <string name="download_url_labels">http://www.stud.fit.vutbr.cz/~xhlava39/DP/index.php?label</string>
     <string name="download_labels">labels.txt</string>
-    <string name="download_url_data">http://google.com</string>
+    <string name="download_url_data">http://www.stud.fit.vutbr.cz/~xhlava39/DP/index.php?tf</string>
     <string name="download_file">detect.tflite</string>
-    
+
+    <string-array name="movements">
+        <item>Squats</item>
+        <item>Rows</item>
+        <item>Deadlifts</item>
+        <item>Bench presses</item>
+        <item>OHPs</item>
+        <item>Pull downs</item>
+        <item>Crunches</item>
+    </string-array>
+
     <string-array name="recognition">
         <item>Recognition</item>
         <item>ic_detect_white_48dp</item>
@@ -52,6 +63,6 @@
     </string-array>
     <string-array name="sync">
         <item>Sync</item>
-        <item>ic_m_white_48dp</item>
+        <item>ic_sync_white_48dp</item>
     </string-array>
 </resources>

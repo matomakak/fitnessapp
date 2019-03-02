@@ -14,6 +14,7 @@ import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.IBinder;
 
+import com.hlavackamartin.fitnessapp.recognition.R;
 import com.hlavackamartin.fitnessapp.recognition.Utilities;
 
 import java.io.File;
@@ -25,8 +26,6 @@ import java.util.Optional;
 
 
 public class MotionRecordingService extends Service implements SensorEventListener {
-
-	private static final String FILE_NAME = "FITness_recordings.csv";
 	
 	private final IBinder mBinder = new LocalBinder();
 
@@ -50,6 +49,12 @@ public class MotionRecordingService extends Service implements SensorEventListen
 
 	@Override
 	public boolean onUnbind(Intent intent) {
+		getWriter().ifPresent(w -> {
+			try {
+				w.flush();
+			} catch (IOException ignored) {
+			}
+		});
 		mSensorManager.unregisterListener(this);
 		return super.onUnbind(intent);
 	}
@@ -72,7 +77,8 @@ public class MotionRecordingService extends Service implements SensorEventListen
 		if (recordingStatus == RecordingStatus.WAITING_FOR_REPS) {
 			getWriter().ifPresent(w -> {
 				try {
-					w.write(String.format(Locale.ENGLISH, "#reps,%d,0,0,0\n\n", reps).getBytes());
+					//FIXME temporary solution
+					//w.write(String.format(Locale.ENGLISH, "#reps,%d,0,0,0\n\n", reps).getBytes());
 					w.flush();
 					recordingStatus = RecordingStatus.STOPPED;
 				} catch (IOException ignored) {
@@ -80,10 +86,13 @@ public class MotionRecordingService extends Service implements SensorEventListen
 			});
 		}
 	}
-	
-	public void stopRepRecording() {
+
+	public void stopRepRecording(boolean noRepsProvided) {
 		if (recordingStatus == RecordingStatus.RECORDING) {
 			recordingStatus = RecordingStatus.WAITING_FOR_REPS;
+		}
+		if (noRepsProvided) {
+			setRepsForFinishedRecording(0);
 		}
 	}
 
@@ -99,7 +108,7 @@ public class MotionRecordingService extends Service implements SensorEventListen
 
 	private File getFile() throws FileNotFoundException {
 		if (recordFile == null) {
-			recordFile = Utilities.getFile(this, FILE_NAME);
+			recordFile = Utilities.getFile(this, getString(R.string.upload_file));
 		}
 		return recordFile;
 	}

@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
@@ -25,6 +26,8 @@ import com.hlavackamartin.fitnessapp.recognition.Utilities;
 import com.hlavackamartin.fitnessapp.recognition.fragment.FitnessAppFragment;
 import com.hlavackamartin.fitnessapp.recognition.service.MotionRecordingService;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -40,6 +43,8 @@ public class LearningFragment extends FitnessAppFragment implements
 	private ProgressBar mProgressBar;
 
 	private String selectedExercise = "";
+	private int selectedExerciseIdx;
+	private String[] exerciseList;
 
 	private boolean mServiceBound = false;
 	private MotionRecordingService mService;
@@ -81,6 +86,9 @@ public class LearningFragment extends FitnessAppFragment implements
 			mTitle.setText(R.string.error__no_storage);
 		}
 
+		exerciseList = getResources().getStringArray(R.array.movements);
+		selectedExerciseIdx = exerciseList.length - 1;
+
 		return rootView;
 	}
 
@@ -101,9 +109,9 @@ public class LearningFragment extends FitnessAppFragment implements
 				showStartCountDownDialog();
 			}
 			else if (status == MotionRecordingService.RecordingStatus.RECORDING) {
-				mService.stopRepRecording();
+				mService.stopRepRecording(true);//FIXME temporary solution
 				indicateRepProcessing(false);
-				showRepCountPickerDialog();
+				//showRepCountPickerDialog(); //FIXME temporary solution
 			}
 		}
 	}
@@ -117,19 +125,21 @@ public class LearningFragment extends FitnessAppFragment implements
 	public void showStartCountDownDialog() {
 		AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
 		alertDialog.setTitle("Start in");
-		alertDialog.setMessage("3");
+		alertDialog.setMessage("6");
 		alertDialog.show();
 
-		new CountDownTimer(3000, 100) {
+		new CountDownTimer(6000, 100) {
 			@Override
 			public void onTick(long millisUntilFinished) {
-				alertDialog.setMessage(String.format(Locale.ENGLISH,"%.1f",millisUntilFinished / (float)1000));
+				alertDialog.setMessage(String.format(Locale.ENGLISH, "%.1f", millisUntilFinished / 1000f));
 			}
 
 			@Override
 			public void onFinish() {
-				alertDialog.dismiss();
-				startRecording();
+				if (alertDialog.isShowing()) {
+					alertDialog.dismiss();
+					startRecording();
+				}
 			}
 		}.start();
 	}
@@ -166,28 +176,25 @@ public class LearningFragment extends FitnessAppFragment implements
 	}
 
 	@Override
-	public int getActionMenu() {
-		return R.menu.learning_type_menu;
+	public List<String> getActionMenu(Resources resources) {
+		List<String> list =
+			new ArrayList<>(Arrays.asList(resources.getStringArray(R.array.movements)));
+		list.add(resources.getString(R.string.custom));
+		return list;
 	}
 
 	@Override
 	public boolean onMenuItemClick(MenuItem menuItem) {
-		switch (menuItem.getItemId()) {
-			case R.id.menu_backflips:
-			case R.id.menu_squats:
-				this.enableSelectedExercise(menuItem.getTitle().toString());
-				break;
-			case R.id.menu_custom:
-				Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-				intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-				startActivityForResult(intent, SPEECH_REQUEST_CODE);
-				break;
-			case R.id.reset_current:
-			case R.id.reset_all:
-				if (mServiceBound) {
-					mService.deleteData();
-				}
-				break;
+		if (menuItem.getTitle().equals(getString(R.string.restart_all))) {
+			if (mServiceBound) {
+				mService.deleteData();
+			}
+		} else if (menuItem.getTitle().equals(getString(R.string.custom))) {
+			Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+			intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+			startActivityForResult(intent, SPEECH_REQUEST_CODE);
+		} else {
+			this.enableSelectedExercise(menuItem.getTitle().toString());
 		}
 		return true;
 	}

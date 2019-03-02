@@ -1,11 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/menu_squats"
-          android:icon="@drawable/ic_barbell_white_48dp"
-          android:title="@string/squats"/>
-    <item android:id="@+id/menu_backflips"
-          android:icon="@drawable/ic_barbell_white_48dp"
-          android:title="@string/backflips"/>
+    <item
+        android:id="@+id/menu_squat"
+        android:icon="@drawable/ic_barbell_white_48dp"
+        android:title="Squats"/>
+    <item
+        android:id="@+id/menu_rows"
+        android:icon="@drawable/ic_barbell_white_48dp"
+        android:title="Rows"/>
+    <item
+        android:id="@+id/menu_deadlift"
+        android:icon="@drawable/ic_barbell_white_48dp"
+        android:title="Deadlifts"/>
+    <item
+        android:id="@+id/menu_bench"
+        android:icon="@drawable/ic_barbell_white_48dp"
+        android:title="Bench presses"/>
+    <item
+        android:id="@+id/menu_ohp"
+        android:icon="@drawable/ic_barbell_white_48dp"
+        android:title="OHPs"/>
+    <item
+        android:id="@+id/menu_pulldown"
+        android:icon="@drawable/ic_barbell_white_48dp"
+        android:title="Pull downs"/>
+    <item
+        android:id="@+id/menu_crunch"
+        android:icon="@drawable/ic_barbell_white_48dp"
+        android:title="Crunches"/>
     <item android:id="@+id/menu_custom"
           android:icon="@drawable/ic_custom_white_48dp"
           android:title="@string/custom"/>

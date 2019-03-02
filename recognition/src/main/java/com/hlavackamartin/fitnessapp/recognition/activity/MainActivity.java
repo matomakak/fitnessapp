@@ -1,23 +1,22 @@
 package com.hlavackamartin.fitnessapp.recognition.activity;
 
 import android.app.FragmentManager;
-import android.app.ProgressDialog;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.wear.widget.drawer.WearableActionDrawerView;
 import android.support.wear.widget.drawer.WearableNavigationDrawerView;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
 import com.hlavackamartin.fitnessapp.recognition.R;
-import com.hlavackamartin.fitnessapp.recognition.Utilities;
 import com.hlavackamartin.fitnessapp.recognition.data.MainMenuItem;
 import com.hlavackamartin.fitnessapp.recognition.fragment.FitnessAppFragment;
 import com.hlavackamartin.fitnessapp.recognition.fragment.impl.DetectionFragment;
 import com.hlavackamartin.fitnessapp.recognition.fragment.impl.LearningFragment;
-import com.hlavackamartin.fitnessapp.recognition.task.SynchronizeTask;
+import com.hlavackamartin.fitnessapp.recognition.fragment.impl.SyncFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +32,10 @@ public class MainActivity extends WearableActivity implements
 	private NavigationAdapter mNavigationAdapter;
 	private WearableNavigationDrawerView mWearableNavigationDrawer;
 	private WearableActionDrawerView mWearableActionDrawer;
+
+	private static final int DETECTION_FRAGMENT_POSITION = 0;
+	private static final int LEARNING_FRAGMENT_POSITION = 1;
+	private static final int SYNC_FRAGMENT_POSITION = 2;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -51,12 +54,14 @@ public class MainActivity extends WearableActivity implements
 		// Peeks action drawer on the bottom.
 		mWearableActionDrawer.getController().peekDrawer();
 		mWearableActionDrawer.setOnMenuItemClickListener(this);
-		
-		mFragments.add(new DetectionFragment());
-		mFragments.add(new LearningFragment());
-		mActiveFragment = 0;
+
+		mFragments.add(DETECTION_FRAGMENT_POSITION, new DetectionFragment());
+		mFragments.add(LEARNING_FRAGMENT_POSITION, new LearningFragment());
+		mFragments.add(SYNC_FRAGMENT_POSITION, new SyncFragment());
+		mActiveFragment = LEARNING_FRAGMENT_POSITION;
 		updateCurrentFragment();
-		
+		mWearableNavigationDrawer.setCurrentItem(mActiveFragment, false);
+
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		setAmbientEnabled();
 	}
@@ -65,10 +70,33 @@ public class MainActivity extends WearableActivity implements
 		FragmentManager fragmentManager = getFragmentManager();
 		FitnessAppFragment fragment = getCurrentFragment().get();
 		fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-		
-		getMenuInflater().inflate(fragment.getActionMenu(), mWearableActionDrawer.getMenu());
+
+		mWearableActionDrawer.getMenu().clear();
+		int i = 0;
+		List<String> items = fragment.getActionMenu(getResources());
+		mWearableActionDrawer.setLockedWhenClosed(items == null);
+		if (items == null) {
+			mWearableActionDrawer.getController().closeDrawer();
+		} else {
+			for (String itemName : items) {
+				MenuItem item = mWearableActionDrawer.getMenu()
+					.add(Menu.NONE, i, i, itemName);
+				item.setIcon(R.drawable.ic_barbell_white_48dp);
+				i++;
+			}
+			if (!items.isEmpty()) {
+				MenuItem separator = mWearableActionDrawer.getMenu().add(Menu.NONE, i, i, "");
+				separator.setIcon(R.drawable.ic_expand_more_white_22);
+				i++;
+			}
+
+			MenuItem reset = mWearableActionDrawer.getMenu()
+				.add(Menu.NONE, i, i, getResources().getString(R.string.restart_all));
+			reset.setIcon(R.drawable.ic_reset_white_48dp);
+			mWearableActionDrawer.getController().peekDrawer();
+		}
 	}
-	
+
 	private Optional<FitnessAppFragment> getCurrentFragment() {
 		return Optional.ofNullable(mFragments.get(mActiveFragment));
 	}
@@ -101,34 +129,6 @@ public class MainActivity extends WearableActivity implements
 		Log.d("", "onExitAmbient()");
 		getCurrentFragment().ifPresent(FitnessAppFragment::onExitAmbient);
 		mWearableActionDrawer.getController().peekDrawer();
-	}
-
-	private void executeSyncTask() {
-		ProgressDialog mProgressDialog;
-
-		mProgressDialog = createSyncDialog(SynchronizeTask.SyncActionType.DOWNLOAD);
-		final SynchronizeTask downloadTask =
-			new SynchronizeTask(this, mProgressDialog, SynchronizeTask.SyncActionType.DOWNLOAD);
-		downloadTask.execute();
-
-		mProgressDialog = createSyncDialog(SynchronizeTask.SyncActionType.UPLOAD);
-		final SynchronizeTask uploadTask =
-			new SynchronizeTask(this, mProgressDialog, SynchronizeTask.SyncActionType.UPLOAD);
-		uploadTask.execute();
-
-		Utilities.readRecognitionLabels(this);
-	}
-
-	private ProgressDialog createSyncDialog(SynchronizeTask.SyncActionType type) {
-		ProgressDialog mProgressDialog;
-		mProgressDialog = new ProgressDialog(this);
-		mProgressDialog.setMessage(getString(
-			type == SynchronizeTask.SyncActionType.UPLOAD ? R.string.upload_message : R.string.download_message
-		));
-		mProgressDialog.setIndeterminate(true);
-		mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-		mProgressDialog.setCancelable(true);
-		return mProgressDialog;
 	}
 
 	private final class NavigationAdapter
@@ -175,16 +175,16 @@ public class MainActivity extends WearableActivity implements
 		void executeAction(int pos) {
 			switch (mMainMenu.get(pos).getType()) {
 				case RECOGNITION:
-					mActiveFragment = 0;
+					mActiveFragment = DETECTION_FRAGMENT_POSITION;
 					updateCurrentFragment();
 					break;
 				case LEARNING:
-					mActiveFragment = 1;
+					mActiveFragment = LEARNING_FRAGMENT_POSITION;
 					updateCurrentFragment();
 					break;
 				case SYNC:
-					//mWearableActionDrawer.
-					mContext.executeSyncTask();
+					mActiveFragment = SYNC_FRAGMENT_POSITION;
+					updateCurrentFragment();
 					break;
 			}
 		}

@@ -30,7 +30,7 @@ public class MainMenuItem {
 	public enum MenuType {
 		RECOGNITION("recognition"),
 		LEARNING("learning"),
-		SYNC("learning");
+		SYNC("sync");
 		
 		private final String name;
 
