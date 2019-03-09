@@ -2,26 +2,26 @@ package com.hlavackamartin.fitnessapp.recognition.data;
 
 public class Exercise {
 
-	private String name;
-	private Integer reps = 0;
+  private String name;
+  private Integer reps = 0;
 
-	public Exercise(String name) {
-		this.name = name;
-	}
-	
-	public void clearStats() {
-		this.reps = 0;
-	}
+  public Exercise(String name) {
+    this.name = name;
+  }
 
-	public void addRep() {
-		this.reps++;
-	}
+  public void clearStats() {
+    this.reps = 0;
+  }
 
-	public String getName() {
-		return name;
-	}
+  public void addRep() {
+    this.reps++;
+  }
 
-	public Integer getReps() {
-		return reps;
-	}
+  public String getName() {
+    return name;
+  }
+
+  public Integer getReps() {
+    return reps;
+  }
 }

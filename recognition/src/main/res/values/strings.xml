@@ -7,6 +7,7 @@
     <string name="gps_paused">Tracking paused…</string>
     <string name="value_default">…</string>
     <string name="result_title">RESULT</string>
+    <string name="ok">OK</string>
     <string name="start">Start</string>
     <string name="pause">Pause</string>
     <string name="stop">Stop</string>
@@ -18,14 +19,11 @@
     <string name="select_exercise">Select exercise</string>
     <string name="record_rep">Record rep</string>
     <string name="complete_rep">Complete rep</string>
+    <string name="rep_number">Number of reps</string>
     <string name="sync">Synchronization</string>
     <string name="download_message">Downloading recognition data</string>
     <string name="upload_message">Uploading recognition data</string>
 
-    <string name="squats">Squats</string>
-    <string name="backflips">Backflips</string>
-    <string name="sideflips">Sideflips</string>
-    <string name="cartwheels">Cartwheels</string>
     <string name="custom">Custom</string>
 
     <string name="reps">reps</string>
@@ -34,7 +32,9 @@
     <string name="min_hr">Min:</string>
     <string name="bpm">bpm</string>
     <string name="sync_fail">Sync failed: </string>
-    <string name="sync_succes">Detection data synced</string>
+    <string name="sync_succes">Detection data synced!</string>
+    <string name="del_succes">Delete successful!</string>
+    <string name="del_fail">Deletion failed!</string>
 
     <string name="upload_file">recordings.csv</string>
     <string name="upload_url">http://www.stud.fit.vutbr.cz/~xhlava39/DP/</string>

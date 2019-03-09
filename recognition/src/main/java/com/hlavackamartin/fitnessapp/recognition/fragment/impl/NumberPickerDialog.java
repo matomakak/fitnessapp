@@ -3,42 +3,38 @@ package com.hlavackamartin.fitnessapp.recognition.fragment.impl;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.widget.NumberPicker;
+import com.hlavackamartin.fitnessapp.recognition.R;
 
 
 public class NumberPickerDialog extends DialogFragment {
-	private NumberPicker.OnValueChangeListener valueChangeListener;
 
-	@Override
-	public Dialog onCreateDialog(Bundle savedInstanceState) {
+  private NumberPicker.OnValueChangeListener valueChangeListener;
 
-		final NumberPicker numberPicker = new NumberPicker(getActivity());
+  @Override
+  public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-		numberPicker.setMinValue(1);
-		numberPicker.setMaxValue(20);
+    final NumberPicker numberPicker = new NumberPicker(getActivity());
 
-		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		builder.setTitle("How many reps");
+    numberPicker.setMinValue(1);
+    numberPicker.setMaxValue(20);
 
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				valueChangeListener.onValueChange(numberPicker,
-					numberPicker.getValue(), numberPicker.getValue());
-			}
-		});
+    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+    builder.setTitle(R.string.rep_number);
 
-		builder.setView(numberPicker);
-		return builder.create();
-	}
+    builder.setPositiveButton(R.string.ok, (dialog, which) -> valueChangeListener
+        .onValueChange(numberPicker, numberPicker.getValue(), numberPicker.getValue()));
 
-	public NumberPicker.OnValueChangeListener getValueChangeListener() {
-		return valueChangeListener;
-	}
+    builder.setView(numberPicker);
+    return builder.create();
+  }
 
-	public void setValueChangeListener(NumberPicker.OnValueChangeListener valueChangeListener) {
-		this.valueChangeListener = valueChangeListener;
-	}
+  public NumberPicker.OnValueChangeListener getValueChangeListener() {
+    return valueChangeListener;
+  }
+
+  public void setValueChangeListener(NumberPicker.OnValueChangeListener valueChangeListener) {
+    this.valueChangeListener = valueChangeListener;
+  }
 }

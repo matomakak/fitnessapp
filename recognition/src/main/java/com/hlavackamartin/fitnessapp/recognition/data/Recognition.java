@@ -2,57 +2,58 @@ package com.hlavackamartin.fitnessapp.recognition.data;
 
 
 public class Recognition {
-	/**
-	 * A unique identifier for what has been recognized. Specific to the class, not the instance of
-	 * the object.
-	 */
-	private final String id;
 
-	/**
-	 * Display name for the recognition.
-	 */
-	private final String title;
+  /**
+   * A unique identifier for what has been recognized. Specific to the class, not the instance of
+   * the object.
+   */
+  private final String id;
 
-	/**
-	 * A sortable score for how good the recognition is relative to others. Higher should be better.
-	 */
-	private final Float confidence;
+  /**
+   * Display name for the recognition.
+   */
+  private final String title;
 
-	public Recognition(
-		final String id, final String title, final Float confidence) {
-		this.id = id;
-		this.title = title;
-		this.confidence = confidence;
-	}
+  /**
+   * A sortable score for how good the recognition is relative to others. Higher should be better.
+   */
+  private final Float confidence;
 
-	public String getId() {
-		return id;
-	}
+  public Recognition(
+      final String id, final String title, final Float confidence) {
+    this.id = id;
+    this.title = title;
+    this.confidence = confidence;
+  }
 
-	public String getTitle() {
-		return title;
-	}
+  public String getId() {
+    return id;
+  }
 
-	public Float getConfidence() {
-		return confidence;
-	}
+  public String getTitle() {
+    return title;
+  }
 
-	@Override
-	public String toString() {
-		String resultString = "";
-		if (id != null) {
-			resultString += "[" + id + "] ";
-		}
+  public Float getConfidence() {
+    return confidence;
+  }
 
-		if (title != null) {
-			resultString += title + " ";
-		}
+  @Override
+  public String toString() {
+    String resultString = "";
+    if (id != null) {
+      resultString += "[" + id + "] ";
+    }
 
-		if (confidence != null) {
-			resultString += String.format("(%.1f%%) ", confidence * 100.0f);
-		}
+    if (title != null) {
+      resultString += title + " ";
+    }
 
-		return resultString.trim();
-	}
+    if (confidence != null) {
+      resultString += String.format("(%.1f%%) ", confidence * 100.0f);
+    }
+
+    return resultString.trim();
+  }
 }
 

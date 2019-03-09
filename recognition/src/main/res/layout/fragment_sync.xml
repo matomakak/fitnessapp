@@ -14,12 +14,13 @@
         android:textAlignment="center"
         android:textColor="@color/white"/>
 
-    <Button
+    <ImageButton
         android:id="@+id/sync_btn"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_centerInParent="true"
-        android:background="@drawable/ic_sync_white_48dp"
+      android:src="@drawable/ic_sync_black_48dp"
+      android:background="@drawable/sync_button"
         android:enabled="true"/>
 
 </RelativeLayout>

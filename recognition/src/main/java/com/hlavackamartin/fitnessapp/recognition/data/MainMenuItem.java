@@ -2,47 +2,48 @@ package com.hlavackamartin.fitnessapp.recognition.data;
 
 
 public class MainMenuItem {
-	private MenuType type;
-	private String name;
-	private String image; 
 
-	public MainMenuItem(MenuType type, String name, String image) {
-		this.type = type;
-		this.name = name;
-		this.image = image;
-	}
-	
-	public MenuType getType() {
-		return type;
-	}
+  private MenuType type;
+  private String name;
+  private String image;
 
-	public String getName() {
-		return name;
-	}
+  public MainMenuItem(MenuType type, String name, String image) {
+    this.type = type;
+    this.name = name;
+    this.image = image;
+  }
 
-	public String getImage() {
-		return image;
-	}
+  public MenuType getType() {
+    return type;
+  }
 
-	public enum MenuType {
-		RECOGNITION("recognition", 0),
-		LEARNING("learning", 1),
-		SYNC("sync", 2);
+  public String getName() {
+    return name;
+  }
 
-		private final String name;
-		private final int pos;
+  public String getImage() {
+    return image;
+  }
 
-		MenuType(String name, int pos) {
-			this.name = name;
-			this.pos = pos;
-		}
+  public enum MenuType {
+    RECOGNITION("recognition", 0),
+    LEARNING("learning", 1),
+    SYNC("sync", 2);
 
-		public String getName() {
-			return this.name;
-		}
+    private final String name;
+    private final int pos;
 
-		public int getPos() {
-			return pos;
-		}
-	}
+    MenuType(String name, int pos) {
+      this.name = name;
+      this.pos = pos;
+    }
+
+    public String getName() {
+      return this.name;
+    }
+
+    public int getPos() {
+      return pos;
+    }
+  }
 }
