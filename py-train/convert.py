@@ -1,4 +1,4 @@
-import sys
+import sys, os
 import warnings
 
 if not sys.warnoptions:
@@ -14,12 +14,13 @@ import tensorflow as tf
 tf.logging.set_verbosity(tf.logging.ERROR)
 from math import ceil
 
-# %matplotlib inline
-# plt.style.use('ggplot')
 
 parser = argparse.ArgumentParser(description='Process input CSV file of recorded activities and trains CNN.')
 parser.add_argument("-i", "--input", dest="input", help="CSV formatted file", metavar="FILE", required=True)
 parser.add_argument("-o", "--output", dest="output", help="Trained neuron network prefix name", metavar="FILE")
+parser.add_argument("-m", "--model", dest="model",
+                    help="Previously trained neuron network prefix name",
+                    metavar="FILE")
 parser.add_argument("-v", "--visualize", dest="visualize", help="Show plots of each recorded exercise",
                     action="store_true", default=False)
 parser.add_argument("--image", dest="image", help="Show image of each recorded exercise chunk",
@@ -31,6 +32,8 @@ parser.add_argument("-f", "--fourier", dest="fourier", help="Show plots of each 
 args = parser.parse_args()
 if args.visualize is False and args.output is None and args.image is False:
     parser.error('-o is required when -v is not set.')
+if args.model is not None and args.output is None:
+  parser.error('-o is required when -m is not set.')
 if args.chunks is True and args.visualize is False:
     parser.error('-v is required when -c is set.')
 if args.fourier is True and args.visualize is False:
@@ -39,7 +42,7 @@ if args.fourier is True and args.visualize is False:
 
 def plot_activity_axis(ax, x, y, title):
     ax.plot(x, y)
-    ax.set_title("")  # (title)
+    # ax.set_title(title)
     ax.xaxis.set_visible(False)
     ax.set_ylim([min(y) - np.std(y), max(y) + np.std(y)])
     ax.set_xlim([min(x), max(x)])
@@ -60,14 +63,15 @@ def plot_activity(name, x, y, z):
 
 def plot_fft_axis(subplot, axis, id):
     W = np.fft.fft(axis)
-    lngth = axis.size
+    length = axis.size
     freq = np.fft.fftfreq(axis.size, 1)
     x = 1.0 / freq[:ceil(axis.size / 2)]
 
     # subplot.yaxis.set_visible(False)
     subplot.set_xlim(0, 80)
-    subplot.plot(lngth / x, abs(W[:ceil(lngth / 2)]))
-    subplot.scatter([lngth / (1 / abs(freq[id])), ], [np.abs(W[id]), ], s=100, color='r')
+    subplot.plot(length / x, abs(W[:ceil(length / 2)]))
+    subplot.scatter([length / (1 / abs(freq[id])), ], [np.abs(W[id]), ], s=100,
+                    color='r')
 
 
 def plot_fft(name, X, idx, Y, idy, Z, idz):
@@ -94,11 +98,14 @@ def estimate_period(df):
     Z = normalize_axis(df["z-axis"]).values
 
     # Look for the longest signal that is "loud"
-    treshhold = 225
+    threshold = 225
     try:
-        idx = np.concatenate([[0], np.where(abs(np.fft.fft(X)) > treshhold)[0]])[-1]
-        idy = np.concatenate([[0], np.where(abs(np.fft.fft(Y)) > treshhold)[0]])[-1]
-        idz = np.concatenate([[0], np.where(abs(np.fft.fft(Z)) > treshhold)[0]])[-1]
+      idx = np.concatenate([[0], np.where(abs(np.fft.fft(X)) > threshold)[0]])[
+        -1]
+      idy = np.concatenate([[0], np.where(abs(np.fft.fft(Y)) > threshold)[0]])[
+        -1]
+      idz = np.concatenate([[0], np.where(abs(np.fft.fft(Z)) > threshold)[0]])[
+        -1]
     except:
         print("problem with " + df["activity"] + " -- " + df["y-axis"][0])
         exit(1)
@@ -151,8 +158,8 @@ def read_data_and_filter(file_path):
     return filter_and_estimate(data)
 
 
-def plot_activities_and_exit(max_len, activities):
-    for activity, filtered, estimation in activities:
+def plot_activities_and_exit(max_len, activities_list):
+  for activity, filtered, estimation in activities_list:
         plot_activity(activity + "--" + str(estimation), filtered['x-axis'], filtered['y-axis'],
                       filtered['z-axis'])
         if args.chunks:
@@ -162,23 +169,24 @@ def plot_activities_and_exit(max_len, activities):
     exit(0)
 
 
-def plot_images_and_exit(length, activities):
-    segments, labels = segment_signal(ceil(np.sqrt(length)) ** 2, activities)
+def plot_images_and_exit(length, activities_list):
+  l_segments, l_labels = segment_signal(ceil(np.sqrt(length)) ** 2,
+                                        activities_list)
 
     f = lambda x: np.abs(x)
-    segments = f(segments)
+  l_segments = f(l_segments)
     f1 = lambda x: x / np.max(x) * 255
 
     fig = plt.figure(figsize=(11, 11))
-    columns = int(np.sqrt(segments.shape[0]))
-    rows = ceil(segments.shape[0] / columns)
+  columns = int(np.sqrt(l_segments.shape[0]))
+  rows = ceil(l_segments.shape[0] / columns)
 
     ax = []
-    for j in range(segments.shape[0]):
-        segments[j] = f1(segments[j])
-        img = segments[j].reshape(11, 11, 3).astype(np.uint8)
+  for j in range(l_segments.shape[0]):
+    l_segments[j] = f1(l_segments[j])
+    img = l_segments[j].reshape(11, 11, 3).astype(np.uint8)
         ax.append(fig.add_subplot(rows, columns, j + 1))
-        ax[-1].set_title(labels[j])
+    ax[-1].set_title(l_labels[j])
         ax[-1].axis('off')
         plt.imshow(img)
 
@@ -187,8 +195,8 @@ def plot_images_and_exit(length, activities):
 
 
 def segment_signal(max_len, filtered_activities):
-    labels = np.empty(0)
-    segments = np.empty((0, max_len, 3))
+  l_labels = np.empty(0)
+  l_segments = np.empty((0, max_len, 3))
 
     for activity, filtered, estimation in filtered_activities:
         chunks = estimation if estimation > 0 else ceil(len(filtered) / max_len)
@@ -197,10 +205,14 @@ def segment_signal(max_len, filtered_activities):
             y = signal.resample(chunk["y-axis"].values, max_len)
             z = signal.resample(chunk["z-axis"].values, max_len)
 
-            segments = np.vstack([segments, np.dstack([x, y, z])])
-            labels = np.append(labels, activity)
+            l_segments = np.vstack([l_segments, np.dstack([x, y, z])])
+            l_labels = np.append(l_labels, activity)
 
-    return segments, labels
+  return l_segments, l_labels
+
+
+def get_labels_file_content(labels, length):
+  return "#SAMPLES#" + str(length) + "\n" + "\n".join(np.unique(labels)) + "\n"
 
 
 length, activities = read_data_and_filter(args.input)
@@ -211,15 +223,77 @@ if args.image:
 if args.visualize:
     plot_activities_and_exit(length, activities)
 
-segments, labels = segment_signal(length, activities)
+segments, labels_full = segment_signal(length, activities)
 reshaped = segments.reshape(len(segments), 1, length, 3)
-labels = np.asarray(pd.get_dummies(labels), dtype=np.int8)
+labels = np.asarray(pd.get_dummies(labels_full), dtype=np.int8)
 
 train_test_split = np.random.rand(len(reshaped)) < 0.70
 train_x = reshaped[train_test_split]
 train_y = labels[train_test_split]
 test_x = reshaped[~train_test_split]
 test_y = labels[~train_test_split]
+##############################################################################
+num_labels = np.unique(labels_full).size
+num_channels = 3
+kernel_size = 60
+depth = 60
+num_hidden = 1000
+training_epochs = 4
+batch_size = 10
+total_batches = train_x.shape[0] // batch_size
+
+MODEL_NAME = "./" + args.output
+INPUT_NAME = "I"
+LABEL_NAME = "Y"
+C_NAME = "c"
+LOSS_NAME = "Neg"
+ACCURACY_NAME = "accuracy"
+OUTPUT_NAME = "O"
+checkpoint_path = MODEL_NAME + '.ckpt'
+
+
+def finalize_learning(svr, sess, input, output, labels, length):
+  svr.save(sess, save_path=checkpoint_path)
+  converter = tf.contrib.lite.TFLiteConverter.from_session(sess, [input],
+                                                           [output])
+  tflite_model = converter.convert()
+  open(MODEL_NAME + ".tflite", "wb").write(tflite_model)
+  open(MODEL_NAME + ".labels", "w").write(
+    get_labels_file_content(labels, length))
+
+
+if args.model is not None:
+  model_suffix = ':0'
+  with tf.Session() as session:
+    head, tail = os.path.split(args.model)
+    saver = tf.train.import_meta_graph(tail + '.meta')
+    if not head:
+      head = './'
+    saver.restore(session, tf.train.latest_checkpoint(head))
+
+    graph = tf.get_default_graph()
+    c = graph.get_tensor_by_name(C_NAME + model_suffix)
+    Y = graph.get_tensor_by_name(LABEL_NAME + model_suffix)
+    X = graph.get_tensor_by_name(INPUT_NAME + model_suffix)
+    y_ = graph.get_tensor_by_name(OUTPUT_NAME + model_suffix)
+    loss = graph.get_tensor_by_name(LOSS_NAME + model_suffix)
+    optimizer = tf.train.GradientDescentOptimizer(
+      learning_rate=0.0001).minimize(loss)
+    accuracy = graph.get_tensor_by_name(ACCURACY_NAME + model_suffix)
+
+    for epoch in range(training_epochs):
+      for b in range(total_batches):
+        offset = (b * batch_size) % (train_y.shape[0] - batch_size)
+        batch_x = train_x[offset:(offset + batch_size), :, :, :]
+        batch_y = train_y[offset:(offset + batch_size), :]
+        _, c = session.run([optimizer, loss],
+                           feed_dict={X: batch_x, Y: batch_y})
+      print("Epoch: ", epoch + 1, " Training Loss: ", c, " Training Accuracy: ",
+            session.run(accuracy, feed_dict={X: train_x, Y: train_y}))
+    print("Testing Accuracy:",
+          session.run(accuracy, feed_dict={X: test_x, Y: test_y}))
+    finalize_learning(saver, session, X, y_, labels_full, length)
+    exit(0)
 
 
 def weight_variable(shape):
@@ -236,10 +310,10 @@ def depthwise_conv2d(x, W):
     return tf.nn.depthwise_conv2d(x, W, [1, 1, 1, 1], padding='VALID')
 
 
-def apply_depthwise_conv(x, kernel_size, num_channels, depth):
+def apply_depthwise_conv(x, kernel_size, num_channels, depth, name):
     weights = weight_variable([1, kernel_size, num_channels, depth])
     biases = bias_variable([depth * num_channels])
-    return tf.nn.relu(tf.add(depthwise_conv2d(x, weights), biases))
+    return tf.nn.relu(tf.add(depthwise_conv2d(x, weights), biases), name=name)
 
 
 def apply_max_pool(x, kernel_size, stride_size):
@@ -248,21 +322,12 @@ def apply_max_pool(x, kernel_size, stride_size):
 
 
 ##############################################################################
-num_labels = 7
-num_channels = 3
-kernel_size = 60
-depth = 60
-num_hidden = 1000
-training_epochs = 4
-batch_size = 10
-total_batches = train_x.shape[0] // batch_size
-OUTPUT_NAME = "O"
-##############################################################################
-X = tf.placeholder(tf.float32, shape=[None, 1, length, num_channels], name="I")
-Y = tf.placeholder(tf.float32, shape=[None, num_labels])
-c = apply_depthwise_conv(X, kernel_size, num_channels, depth)
+X = tf.placeholder(tf.float32, shape=[None, 1, length, num_channels],
+                   name=INPUT_NAME)
+Y = tf.placeholder(tf.float32, shape=[None, num_labels], name=LABEL_NAME)
+c = apply_depthwise_conv(X, kernel_size, num_channels, depth, None)
 p = apply_max_pool(c, 20, 2)
-c = apply_depthwise_conv(p, 6, depth * num_channels, depth // 10)
+c = apply_depthwise_conv(p, 6, depth * num_channels, depth // 10, C_NAME)
 shape = c.get_shape().as_list()
 c_flat = tf.reshape(c, [-1, shape[1] * shape[2] * shape[3]])
 f_weights_l1 = weight_variable([shape[1] * shape[2] * depth * num_channels * (depth // 10), num_hidden])
@@ -272,12 +337,11 @@ out_weights = weight_variable([num_hidden, num_labels])
 out_biases = bias_variable([num_labels])
 y_ = tf.nn.softmax(tf.matmul(f, out_weights) + out_biases, name=OUTPUT_NAME)
 #############################################################################
-loss = -tf.reduce_sum(Y * tf.log(y_))
+loss = -tf.reduce_sum(Y * tf.log(y_), name=LOSS_NAME)
 optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.0001).minimize(loss)
 correct_prediction = tf.equal(tf.argmax(y_, 1), tf.argmax(Y, 1))
-accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-
-MODEL_NAME = "./" + args.output
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32),
+                          name=ACCURACY_NAME)
 
 init_op = tf.global_variables_initializer()
 saver = tf.train.Saver()
@@ -293,35 +357,28 @@ with tf.Session() as session:
               session.run(accuracy, feed_dict={X: train_x, Y: train_y}))
     print("Testing Accuracy:", session.run(accuracy, feed_dict={X: test_x, Y: test_y}))
     # tf.train.write_graph(session.graph_def, '.', "Users/Martin/Desktop/model.pbtxt", as_text=True)
-    # saver.save(session, save_path="Users/Martin/Desktop/model.ckpt")
-    converter = tf.contrib.lite.TFLiteConverter.from_session(session, [X], [y_])
-    tflite_model = converter.convert()
-    open(MODEL_NAME + ".tflite", "wb").write(tflite_model)
-
+    finalize_learning(saver, session, X, y_, labels_full, length)
 exit(0)
-
-############################################
-# #FREEZING AND RECOVERING + SAVING GRAPH# #
-############################################
-
-from tensorflow.python.tools import freeze_graph
-
-input_graph_path = MODEL_NAME + '.pbtxt'
-checkpoint_path = MODEL_NAME + '.ckpt'
-input_saver_def_path = ""
-input_binary = False
-output_node_names = OUTPUT_NAME
-restore_op_name = "save/restore_all"
-filename_tensor_name = "save/Const:0"
-output_frozen_graph_name = MODEL_NAME + '_frozen' + '.pb'
-clear_devices = True
-
-freeze_graph.freeze_graph(input_graph_path, input_saver_def_path, input_binary, checkpoint_path, output_node_names,
-                          restore_op_name, filename_tensor_name, output_frozen_graph_name, clear_devices, "")
+###########################################
+# FREEZING AND RECOVERING + SAVING GRAPH #
+###########################################
+# from tensorflow.python.tools import freeze_graph
+#
+# input_graph_path = MODEL_NAME + '.pbtxt'
+# input_saver_def_path = ""
+# input_binary = False
+# output_node_names = OUTPUT_NAME
+# restore_op_name = "save/restore_all"
+# filename_tensor_name = "save/Const:0"
+# output_frozen_graph_name = MODEL_NAME + '_frozen' + '.pb'
+# clear_devices = True
+#
+# freeze_graph.freeze_graph(input_graph_path, input_saver_def_path, input_binary, checkpoint_path, output_node_names,
+#                           restore_op_name, filename_tensor_name, output_frozen_graph_name, clear_devices, "")
 ##########
 # TFLITE #
 ##########
-converter = tf.lite.TFLiteConverter.from_frozen_graph(MODEL_NAME + '_frozen' + '.pb', ["I"],
-                                                      [OUTPUT_NAME])
-tflite_model = converter.convert()
-open(MODEL_NAME + "converted.tflite", "wb").write(tflite_model)
+# converter = tf.contrib.lite.TFLiteConverter.from_frozen_graph(MODEL_NAME + '_frozen' + '.pb', ["I"],
+#                                                       [OUTPUT_NAME])
+# tflite_model = converter.convert()
+# open(MODEL_NAME + "converted.tflite", "wb").write(tflite_model)
