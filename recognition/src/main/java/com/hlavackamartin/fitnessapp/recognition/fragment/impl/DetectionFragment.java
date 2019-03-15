@@ -20,7 +20,7 @@ import com.hlavackamartin.fitnessapp.recognition.data.Recognition;
 import com.hlavackamartin.fitnessapp.recognition.fragment.FitnessAppFragment;
 import com.hlavackamartin.fitnessapp.recognition.provider.ActivityInference;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +34,7 @@ public class DetectionFragment extends FitnessAppFragment
   private static List<Float> y;
   private static List<Float> z;
   private static List<List<Float>> input_signal;
+  private SensorManager mSensorManager;
   private String mSelectedExercise;
   private ValueType mValueShowing = ValueType.REPS;
   private TextView mTitle;
@@ -57,21 +58,38 @@ public class DetectionFragment extends FitnessAppFragment
     y = new ArrayList<>();
     z = new ArrayList<>();
     input_signal = new ArrayList<>();
-    //activityInference = ActivityInference.getInstance(getContext());
-
-    SensorManager mSensorManager = (SensorManager) getActivity()
-        .getSystemService(Context.SENSOR_SERVICE);
-    //Utilities.initializeSensor(this, mSensorManager, Sensor.TYPE_ACCELEROMETER);
-    //Utilities.initializeSensor(this, mSensorManager, Sensor.TYPE_HEART_RATE);
+    activityInference = ActivityInference.getInstance(getContext());
 
     return super.onCreateView(inflater, container, savedInstanceState);
   }
 
   @Override
+  public void onStart() {
+    super.onStart();
+    mSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+    mSelectedExercise = "";
+    N_SAMPLES = Utilities.readSampleSize(getContext());
+  }
+
+  @Override
   public void onResume() {
     super.onResume();
-    N_SAMPLES = Utilities.readSampleSize(getContext());
-    mSelectedExercise = "";
+    startTask();
+  }
+
+  private void startTask() {
+    Utilities.initializeSensor(this, mSensorManager, Sensor.TYPE_ACCELEROMETER);
+    //Utilities.initializeSensor(this, mSensorManager, Sensor.TYPE_HEART_RATE);
+  }
+
+  @Override
+  public void onPause() {
+    endTask();
+    super.onPause();
+  }
+
+  private void endTask() {
+    mSensorManager.unregisterListener(this);
   }
 
   @Override
@@ -82,19 +100,21 @@ public class DetectionFragment extends FitnessAppFragment
 
   @Override
   public List<String> getActionMenu(Resources resources) {
-    return Collections.emptyList();
+    return new ArrayList<>(Arrays.asList(resources.getStringArray(R.array.controls)));
   }
 
   @Override
   public boolean onMenuItemClick(MenuItem menuItem) {
-    switch (menuItem.getItemId()) {
-      case R.id.reset_current:
-        Optional.of(exerciseStats.get(mSelectedExercise)).ifPresent(Exercise::clearStats);
-        break;
-      case R.id.reset_all:
-        exerciseStats.clear();
-        break;
+    if (menuItem.getTitle().equals(getString(R.string.restart_current))) {
+      Optional.of(exerciseStats.get(mSelectedExercise)).ifPresent(Exercise::clearStats);
+    } else if (menuItem.getTitle().equals(getString(R.string.restart_all))) {
+      exerciseStats.clear();
+    } else if (menuItem.getTitle().toString().contains((getString(R.string.start)))) {
+      startTask();
+    } else if (menuItem.getTitle().toString().contains((getString(R.string.stop)))) {
+      endTask();
     }
+    
     return true;
   }
 
@@ -136,8 +156,8 @@ public class DetectionFragment extends FitnessAppFragment
 
         for (Recognition r : recognitions) {
           if (r.getConfidence() > 0.7) {
-            getExerciseStat(r.getTitle()).addRep();
             mSelectedExercise = r.getTitle();
+            getExerciseStat(r.getTitle()).addRep();
             updateValue();
             break;
           }

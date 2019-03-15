@@ -53,6 +53,11 @@
         <item>Crunches</item>
     </string-array>
 
+    <string-array name="controls">
+        <item>Start recognition</item>
+        <item>Stop recognition</item>
+    </string-array>
+
     <string-array name="recognition">
         <item>Recognition</item>
         <item>ic_detect_white_48dp</item>
