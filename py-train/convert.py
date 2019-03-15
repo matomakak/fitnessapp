@@ -1,4 +1,5 @@
-import sys, os
+import os
+import sys
 import warnings
 
 if not sys.warnoptions:
@@ -14,13 +15,14 @@ import tensorflow as tf
 tf.logging.set_verbosity(tf.logging.ERROR)
 from math import ceil
 
-
 parser = argparse.ArgumentParser(description='Process input CSV file of recorded activities and trains CNN.')
 parser.add_argument("-i", "--input", dest="input", help="CSV formatted file", metavar="FILE", required=True)
 parser.add_argument("-o", "--output", dest="output", help="Trained neuron network prefix name", metavar="FILE")
 parser.add_argument("-m", "--model", dest="model",
                     help="Previously trained neuron network prefix name",
                     metavar="FILE")
+parser.add_argument("--length", dest="sample_length",
+                    help="Length of single sample", type=int)
 parser.add_argument("-v", "--visualize", dest="visualize", help="Show plots of each recorded exercise",
                     action="store_true", default=False)
 parser.add_argument("--image", dest="image", help="Show image of each recorded exercise chunk",
@@ -172,7 +174,6 @@ def plot_activities_and_exit(max_len, activities_list):
 def plot_images_and_exit(length, activities_list):
   l_segments, l_labels = segment_signal(ceil(np.sqrt(length)) ** 2,
                                         activities_list)
-
     f = lambda x: np.abs(x)
   l_segments = f(l_segments)
     f1 = lambda x: x / np.max(x) * 255
@@ -187,9 +188,8 @@ def plot_images_and_exit(length, activities_list):
     img = l_segments[j].reshape(11, 11, 3).astype(np.uint8)
         ax.append(fig.add_subplot(rows, columns, j + 1))
     ax[-1].set_title(l_labels[j])
-        ax[-1].axis('off')
-        plt.imshow(img)
-
+ax[-1].axis('off')
+plt.imshow(img)
     plt.show()
     exit(0)
 
@@ -207,7 +207,6 @@ def segment_signal(max_len, filtered_activities):
 
             l_segments = np.vstack([l_segments, np.dstack([x, y, z])])
             l_labels = np.append(l_labels, activity)
-
   return l_segments, l_labels
 
 
@@ -223,25 +222,6 @@ if args.image:
 if args.visualize:
     plot_activities_and_exit(length, activities)
 
-segments, labels_full = segment_signal(length, activities)
-reshaped = segments.reshape(len(segments), 1, length, 3)
-labels = np.asarray(pd.get_dummies(labels_full), dtype=np.int8)
-
-train_test_split = np.random.rand(len(reshaped)) < 0.70
-train_x = reshaped[train_test_split]
-train_y = labels[train_test_split]
-test_x = reshaped[~train_test_split]
-test_y = labels[~train_test_split]
-##############################################################################
-num_labels = np.unique(labels_full).size
-num_channels = 3
-kernel_size = 60
-depth = 60
-num_hidden = 1000
-training_epochs = 4
-batch_size = 10
-total_batches = train_x.shape[0] // batch_size
-
 MODEL_NAME = "./" + args.output
 INPUT_NAME = "I"
 LABEL_NAME = "Y"
@@ -251,6 +231,9 @@ ACCURACY_NAME = "accuracy"
 OUTPUT_NAME = "O"
 checkpoint_path = MODEL_NAME + '.ckpt'
 
+training_epochs = 4
+batch_size = 10
+
 
 def finalize_learning(svr, sess, input, output, labels, length):
   svr.save(sess, save_path=checkpoint_path)
@@ -259,7 +242,7 @@ def finalize_learning(svr, sess, input, output, labels, length):
   tflite_model = converter.convert()
   open(MODEL_NAME + ".tflite", "wb").write(tflite_model)
   open(MODEL_NAME + ".labels", "w").write(
-    get_labels_file_content(labels, length))
+      get_labels_file_content(labels, length))
 
 
 if args.model is not None:
@@ -278,8 +261,21 @@ if args.model is not None:
     y_ = graph.get_tensor_by_name(OUTPUT_NAME + model_suffix)
     loss = graph.get_tensor_by_name(LOSS_NAME + model_suffix)
     optimizer = tf.train.GradientDescentOptimizer(
-      learning_rate=0.0001).minimize(loss)
+        learning_rate=0.0001).minimize(loss)
     accuracy = graph.get_tensor_by_name(ACCURACY_NAME + model_suffix)
+
+    length = X.shape.dims[
+      2].value if args.sample_length is None else args.sample_length
+    segments, labels_full = segment_signal(length, activities)
+    reshaped = segments.reshape(len(segments), 1, length, 3)
+    labels = np.asarray(pd.get_dummies(labels_full), dtype=np.int8)
+
+    train_test_split = np.random.rand(len(reshaped)) < 0.70
+    train_x = reshaped[train_test_split]
+    train_y = labels[train_test_split]
+    test_x = reshaped[~train_test_split]
+    test_y = labels[~train_test_split]
+    total_batches = train_x.shape[0] // batch_size
 
     for epoch in range(training_epochs):
       for b in range(total_batches):
@@ -294,6 +290,23 @@ if args.model is not None:
           session.run(accuracy, feed_dict={X: test_x, Y: test_y}))
     finalize_learning(saver, session, X, y_, labels_full, length)
     exit(0)
+
+segments, labels_full = segment_signal(length, activities)
+reshaped = segments.reshape(len(segments), 1, length, 3)
+labels = np.asarray(pd.get_dummies(labels_full), dtype=np.int8)
+
+train_test_split = np.random.rand(len(reshaped)) < 0.70
+train_x = reshaped[train_test_split]
+train_y = labels[train_test_split]
+test_x = reshaped[~train_test_split]
+test_y = labels[~train_test_split]
+##############################################################################
+num_labels = np.unique(labels_full).size
+num_channels = 3
+kernel_size = 60
+depth = 60
+num_hidden = 1000
+total_batches = train_x.shape[0] // batch_size
 
 
 def weight_variable(shape):
