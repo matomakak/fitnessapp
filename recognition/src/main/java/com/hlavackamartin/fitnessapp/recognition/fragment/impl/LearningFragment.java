@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.speech.RecognizerIntent;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,12 +37,13 @@ public class LearningFragment extends FitnessAppFragment implements
     NumberPicker.OnValueChangeListener {
 
   private static final int SPEECH_REQUEST_CODE = 1;
+  private static final String EXERCISE_BUNDLE_KEY = "EXERCISE_BUNDLE_KEY";
 
   private TextView mTitle;
   private Button mButton;
   private ProgressBar mProgressBar;
 
-  private String selectedExercise = "";
+  private String selectedExercise;
 
   private boolean mServiceBound = false;
   private MotionRecordingService mService;
@@ -58,6 +60,18 @@ public class LearningFragment extends FitnessAppFragment implements
       mServiceBound = false;
     }
   };
+
+  @Override
+  public void onSaveInstanceState(Bundle outState) {
+    outState.putString(EXERCISE_BUNDLE_KEY, selectedExercise);
+    super.onSaveInstanceState(outState);
+  }
+
+  @Override
+  public void onCreate(@Nullable Bundle state) {
+    super.onCreate(state);
+    selectedExercise = state != null ? state.getString(EXERCISE_BUNDLE_KEY, "") : "";
+  }
 
   @Override
   public View onCreateView(

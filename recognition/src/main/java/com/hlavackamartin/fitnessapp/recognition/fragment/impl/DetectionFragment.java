@@ -7,6 +7,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,6 +31,9 @@ import java.util.Optional;
 public class DetectionFragment extends FitnessAppFragment
     implements View.OnClickListener, SensorEventListener {
 
+  private static final String RECOGNITION_STARTED_BUNDLE_KEY = "RECOGNITION_STARTED_BUNDLE_KEY";
+  private boolean recognitionInProgress;
+
   private static List<Float> x;
   private static List<Float> y;
   private static List<Float> z;
@@ -44,6 +48,19 @@ public class DetectionFragment extends FitnessAppFragment
   private HeartRateData heartRateData = new HeartRateData();
 
   private int N_SAMPLES = -1;
+
+  @Override
+  public void onSaveInstanceState(Bundle savedInstanceState) {
+    savedInstanceState.putBoolean(RECOGNITION_STARTED_BUNDLE_KEY, recognitionInProgress);
+    super.onSaveInstanceState(savedInstanceState);
+  }
+
+  @Override
+  public void onCreate(@Nullable Bundle state) {
+    super.onCreate(state);
+    this.recognitionInProgress =
+        state != null && state.getBoolean(RECOGNITION_STARTED_BUNDLE_KEY, false);
+  }
 
   @Override
   public View onCreateView(
@@ -74,10 +91,13 @@ public class DetectionFragment extends FitnessAppFragment
   @Override
   public void onResume() {
     super.onResume();
-    startTask();
+    if (recognitionInProgress) {
+      startTask();
+    }
   }
 
   private void startTask() {
+    recognitionInProgress = true;
     Utilities.initializeSensor(this, mSensorManager, Sensor.TYPE_ACCELEROMETER);
     //Utilities.initializeSensor(this, mSensorManager, Sensor.TYPE_HEART_RATE);
   }
@@ -114,7 +134,7 @@ public class DetectionFragment extends FitnessAppFragment
     } else if (menuItem.getTitle().toString().contains((getString(R.string.stop)))) {
       endTask();
     }
-    
+
     return true;
   }
 

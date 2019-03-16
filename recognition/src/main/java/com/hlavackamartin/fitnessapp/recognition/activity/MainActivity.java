@@ -3,6 +3,7 @@ package com.hlavackamartin.fitnessapp.recognition.activity;
 import android.app.FragmentManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.wear.widget.drawer.WearableActionDrawerView;
 import android.support.wear.widget.drawer.WearableNavigationDrawerView;
 import android.support.wearable.activity.WearableActivity;
@@ -23,6 +24,8 @@ public class MainActivity extends WearableActivity implements
     WearableNavigationDrawerView.OnItemSelectedListener,
     MenuItem.OnMenuItemClickListener {
 
+  private static final String FRAGMENT_POSITION_BUNDLE_KEY = "FRAGMENT_POSITION_BUNDLE_KEY";
+
   private List<FitnessAppFragment> mFragments = new ArrayList<>();
   private int mActiveFragment;
 
@@ -31,8 +34,14 @@ public class MainActivity extends WearableActivity implements
   private WearableActionDrawerView mWearableActionDrawer;
 
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+  public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+    outState.putInt(FRAGMENT_POSITION_BUNDLE_KEY, mActiveFragment);
+    super.onSaveInstanceState(outState, outPersistentState);
+  }
+
+  @Override
+  protected void onCreate(Bundle state) {
+    super.onCreate(state);
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     setAmbientEnabled();
 
@@ -51,12 +60,19 @@ public class MainActivity extends WearableActivity implements
     mFragments.add(MainMenuItem.MenuType.RECOGNITION.getPos(), new DetectionFragment());
     mFragments.add(MainMenuItem.MenuType.LEARNING.getPos(), new LearningFragment());
     mFragments.add(MainMenuItem.MenuType.SYNC.getPos(), new SyncFragment());
-    mActiveFragment = MainMenuItem.MenuType.LEARNING.getPos();
-    updateCurrentFragment();
-    mWearableNavigationDrawer.setCurrentItem(mActiveFragment, false);
+    mActiveFragment = state != null ?
+        state.getInt(FRAGMENT_POSITION_BUNDLE_KEY, MainMenuItem.MenuType.LEARNING.getPos()) :
+        MainMenuItem.MenuType.LEARNING.getPos();
 
     mWearableNavigationDrawer.getController().peekDrawer();
     mWearableActionDrawer.getController().peekDrawer();
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
+    updateCurrentFragment();
+    mWearableNavigationDrawer.setCurrentItem(mActiveFragment, false);
   }
 
   private void updateCurrentFragment() {
