@@ -1,5 +1,4 @@
-import os
-import sys
+import sys, os
 import warnings
 
 if not sys.warnoptions:
@@ -15,31 +14,31 @@ import tensorflow as tf
 tf.logging.set_verbosity(tf.logging.ERROR)
 from math import ceil
 
-parser = argparse.ArgumentParser(description='Process input CSV file of recorded activities and trains CNN.')
-parser.add_argument("-i", "--input", dest="input", help="CSV formatted file", metavar="FILE", required=True)
-parser.add_argument("-o", "--output", dest="output", help="Trained neuron network prefix name", metavar="FILE")
-parser.add_argument("-m", "--model", dest="model",
+parser = argparse.ArgumentParser(description="Process input CSV file of recorded activities and trains CNN.")
+parser.add_argument('-i', '--input', dest="input", help="CSV formatted file", metavar="FILE", required=True)
+parser.add_argument('-o', '--output', dest="output", help="Trained neuron network prefix name", metavar="FILE")
+parser.add_argument('-m', '--model', dest="model",
                     help="Previously trained neuron network prefix name",
                     metavar="FILE")
-parser.add_argument("--length", dest="sample_length",
+parser.add_argument('--length', dest="sample_length",
                     help="Length of single sample", type=int)
-parser.add_argument("-v", "--visualize", dest="visualize", help="Show plots of each recorded exercise",
+parser.add_argument('-v', '--visualize', dest="visualize", help="Show plots of each recorded exercise",
                     action="store_true", default=False)
-parser.add_argument("--image", dest="image", help="Show image of each recorded exercise chunk",
+parser.add_argument('--image', dest='image', help="Show image of each recorded exercise chunk",
                     action="store_true", default=False)
-parser.add_argument("-c", "--chunks", dest="chunks", help="Show plots of each recorded chunk of exercise",
+parser.add_argument('-c', '--chunks', dest="chunks", help="Show plots of each recorded chunk of exercise",
                     action="store_true", default=False)
-parser.add_argument("-f", "--fourier", dest="fourier", help="Show plots of each DFT used for period estimation",
+parser.add_argument('-f', '--fourier', dest="fourier", help="Show plots of each DFT used for period estimation",
                     action="store_true", default=False)
 args = parser.parse_args()
 if args.visualize is False and args.output is None and args.image is False:
-    parser.error('-o is required when -v is not set.')
+    parser.error("-o is required when -v is not set.")
 if args.model is not None and args.output is None:
-  parser.error('-o is required when -m is not set.')
+    parser.error("-o is required when -m is not set.")
 if args.chunks is True and args.visualize is False:
-    parser.error('-v is required when -c is set.')
+    parser.error("-v is required when -c is set.")
 if args.fourier is True and args.visualize is False:
-    parser.error('-v is required when -f is set.')
+    parser.error("-v is required when -f is set.")
 
 
 def plot_activity_axis(ax, x, y, title):
@@ -72,8 +71,7 @@ def plot_fft_axis(subplot, axis, id):
     # subplot.yaxis.set_visible(False)
     subplot.set_xlim(0, 80)
     subplot.plot(length / x, abs(W[:ceil(length / 2)]))
-    subplot.scatter([length / (1 / abs(freq[id])), ], [np.abs(W[id]), ], s=100,
-                    color='r')
+    subplot.scatter([length / (1 / abs(freq[id])), ], [np.abs(W[id]), ], s=100, color='r')
 
 
 def plot_fft(name, X, idx, Y, idy, Z, idz):
@@ -95,25 +93,24 @@ def normalize_axis(input):
 
 
 def estimate_period(df):
-    X = normalize_axis(df["x-axis"]).values
-    Y = normalize_axis(df["y-axis"]).values
-    Z = normalize_axis(df["z-axis"]).values
+    if df['activity'].values[0].lower() == "none":
+        return 0
+    X = normalize_axis(df['x-axis']).values
+    Y = normalize_axis(df['y-axis']).values
+    Z = normalize_axis(df['z-axis']).values
 
     # Look for the longest signal that is "loud"
     threshold = 225
     try:
-      idx = np.concatenate([[0], np.where(abs(np.fft.fft(X)) > threshold)[0]])[
-        -1]
-      idy = np.concatenate([[0], np.where(abs(np.fft.fft(Y)) > threshold)[0]])[
-        -1]
-      idz = np.concatenate([[0], np.where(abs(np.fft.fft(Z)) > threshold)[0]])[
-        -1]
+        idx = np.concatenate([[0], np.where(abs(np.fft.fft(X)) > threshold)[0]])[-1]
+        idy = np.concatenate([[0], np.where(abs(np.fft.fft(Y)) > threshold)[0]])[-1]
+        idz = np.concatenate([[0], np.where(abs(np.fft.fft(Z)) > threshold)[0]])[-1]
     except:
-        print("problem with " + df["activity"] + " -- " + df["y-axis"][0])
+        print("problem with " + df['activity'] + " -- " + df['timestamp'])
         exit(1)
 
     if args.fourier:
-        plot_fft(df["activity"].iloc[0], X, idx, Y, idy, Z, idz)
+        plot_fft(df['activity'].iloc[0], X, idx, Y, idy, Z, idz)
 
     freq = np.fft.fftfreq(X.size, 1)
 
@@ -125,9 +122,7 @@ def estimate_period(df):
 def filter_and_estimate(data):
     all_max = 0
     filtered_activities = []
-    indexes = [0] + list(
-        idx for idx, (i, j) in enumerate(zip(data['timestamp'], data['timestamp'][1:]), 1) if
-        (i + 1000 < j) or (i - 1000 > j))
+    indexes = [0] + list(idx for idx, (i, j) in enumerate(zip(data['timestamp'], data['timestamp'][1:]), 1) if (i + 1000 < j) or (i - 1000 > j))
     for i in range(len(indexes)):
         start = 0 if i == 0 else indexes[i] + 1
         if i + 1 < len(indexes):
@@ -161,9 +156,8 @@ def read_data_and_filter(file_path):
 
 
 def plot_activities_and_exit(max_len, activities_list):
-  for activity, filtered, estimation in activities_list:
-        plot_activity(activity + "--" + str(estimation), filtered['x-axis'], filtered['y-axis'],
-                      filtered['z-axis'])
+    for activity, filtered, estimation in activities_list:
+        plot_activity(activity + "--" + str(estimation), filtered['x-axis'], filtered['y-axis'], filtered['z-axis'])
         if args.chunks:
             chunks = estimation if estimation > 0 else ceil(len(filtered) / max_len)
             for chunk in np.array_split(filtered, chunks):
@@ -172,46 +166,46 @@ def plot_activities_and_exit(max_len, activities_list):
 
 
 def plot_images_and_exit(length, activities_list):
-  l_segments, l_labels = segment_signal(ceil(np.sqrt(length)) ** 2,
-                                        activities_list)
+    l_segments, l_labels = segment_signal(ceil(np.sqrt(length)) ** 2, activities_list)
     f = lambda x: np.abs(x)
-  l_segments = f(l_segments)
+    l_segments = f(l_segments)
     f1 = lambda x: x / np.max(x) * 255
 
     fig = plt.figure(figsize=(11, 11))
-  columns = int(np.sqrt(l_segments.shape[0]))
-  rows = ceil(l_segments.shape[0] / columns)
+    columns = int(np.sqrt(l_segments.shape[0]))
+    rows = ceil(l_segments.shape[0] / columns)
 
     ax = []
-  for j in range(l_segments.shape[0]):
-    l_segments[j] = f1(l_segments[j])
-    img = l_segments[j].reshape(11, 11, 3).astype(np.uint8)
+    for j in range(l_segments.shape[0]):
+        l_segments[j] = f1(l_segments[j])
+        img = l_segments[j].reshape(11, 11, 3).astype(np.uint8)
         ax.append(fig.add_subplot(rows, columns, j + 1))
     ax[-1].set_title(l_labels[j])
-ax[-1].axis('off')
-plt.imshow(img)
+    ax[-1].axis('off')
+    plt.imshow(img)
     plt.show()
     exit(0)
 
 
 def segment_signal(max_len, filtered_activities):
-  l_labels = np.empty(0)
-  l_segments = np.empty((0, max_len, 3))
+    l_labels = np.empty(0)
+    l_segments = np.empty((0, max_len, 3))
 
     for activity, filtered, estimation in filtered_activities:
         chunks = estimation if estimation > 0 else ceil(len(filtered) / max_len)
         for chunk in np.array_split(filtered, chunks):
-            x = signal.resample(chunk["x-axis"].values, max_len)
-            y = signal.resample(chunk["y-axis"].values, max_len)
-            z = signal.resample(chunk["z-axis"].values, max_len)
+            x = signal.resample(chunk['x-axis'].values, max_len)
+            y = signal.resample(chunk['y-axis'].values, max_len)
+            z = signal.resample(chunk['z-axis'].values, max_len)
 
             l_segments = np.vstack([l_segments, np.dstack([x, y, z])])
             l_labels = np.append(l_labels, activity)
-  return l_segments, l_labels
+
+    return l_segments, l_labels
 
 
 def get_labels_file_content(labels, length):
-  return "#SAMPLES#" + str(length) + "\n" + "\n".join(np.unique(labels)) + "\n"
+    return "#SAMPLES#" + str(length) + "\n" + "\n".join(np.unique(labels)) + "\n"
 
 
 length, activities = read_data_and_filter(args.input)
@@ -229,67 +223,62 @@ C_NAME = "c"
 LOSS_NAME = "Neg"
 ACCURACY_NAME = "accuracy"
 OUTPUT_NAME = "O"
-checkpoint_path = MODEL_NAME + '.ckpt'
+checkpoint_path = MODEL_NAME + ".ckpt"
 
 training_epochs = 4
 batch_size = 10
 
 
 def finalize_learning(svr, sess, input, output, labels, length):
-  svr.save(sess, save_path=checkpoint_path)
-  converter = tf.contrib.lite.TFLiteConverter.from_session(sess, [input],
-                                                           [output])
-  tflite_model = converter.convert()
-  open(MODEL_NAME + ".tflite", "wb").write(tflite_model)
-  open(MODEL_NAME + ".labels", "w").write(
-      get_labels_file_content(labels, length))
+    svr.save(sess, save_path=checkpoint_path)
+    converter = tf.contrib.lite.TFLiteConverter.from_session(sess, [input],
+                                                             [output])
+    tflite_model = converter.convert()
+    open(MODEL_NAME + ".tflite", 'wb').write(tflite_model)
+    open(MODEL_NAME + ".labels", 'w').write(get_labels_file_content(labels, length))
 
 
 if args.model is not None:
-  model_suffix = ':0'
-  with tf.Session() as session:
-    head, tail = os.path.split(args.model)
-    saver = tf.train.import_meta_graph(tail + '.meta')
-    if not head:
-      head = './'
-    saver.restore(session, tf.train.latest_checkpoint(head))
+    model_suffix = ':0'
+    with tf.Session() as session:
+        head, tail = os.path.split(args.model)
+        saver = tf.train.import_meta_graph(tail + ".meta")
+        if not head:
+            head = "./"
+        saver.restore(session, tf.train.latest_checkpoint(head))
 
-    graph = tf.get_default_graph()
-    c = graph.get_tensor_by_name(C_NAME + model_suffix)
-    Y = graph.get_tensor_by_name(LABEL_NAME + model_suffix)
-    X = graph.get_tensor_by_name(INPUT_NAME + model_suffix)
-    y_ = graph.get_tensor_by_name(OUTPUT_NAME + model_suffix)
-    loss = graph.get_tensor_by_name(LOSS_NAME + model_suffix)
-    optimizer = tf.train.GradientDescentOptimizer(
-        learning_rate=0.0001).minimize(loss)
-    accuracy = graph.get_tensor_by_name(ACCURACY_NAME + model_suffix)
+        graph = tf.get_default_graph()
+        c = graph.get_tensor_by_name(C_NAME + model_suffix)
+        Y = graph.get_tensor_by_name(LABEL_NAME + model_suffix)
+        X = graph.get_tensor_by_name(INPUT_NAME + model_suffix)
+        y_ = graph.get_tensor_by_name(OUTPUT_NAME + model_suffix)
+        loss = graph.get_tensor_by_name(LOSS_NAME + model_suffix)
+        optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.0001).minimize(loss)
+        accuracy = graph.get_tensor_by_name(ACCURACY_NAME + model_suffix)
 
-    length = X.shape.dims[
-      2].value if args.sample_length is None else args.sample_length
-    segments, labels_full = segment_signal(length, activities)
-    reshaped = segments.reshape(len(segments), 1, length, 3)
-    labels = np.asarray(pd.get_dummies(labels_full), dtype=np.int8)
+        length = X.shape.dims[2].value if args.sample_length is None else args.sample_length
+        segments, labels_full = segment_signal(length, activities)
+        reshaped = segments.reshape(len(segments), 1, length, 3)
+        labels = np.asarray(pd.get_dummies(labels_full), dtype=np.int8)
 
-    train_test_split = np.random.rand(len(reshaped)) < 0.70
-    train_x = reshaped[train_test_split]
-    train_y = labels[train_test_split]
-    test_x = reshaped[~train_test_split]
-    test_y = labels[~train_test_split]
-    total_batches = train_x.shape[0] // batch_size
+        train_test_split = np.random.rand(len(reshaped)) < 0.70
+        train_x = reshaped[train_test_split]
+        train_y = labels[train_test_split]
+        test_x = reshaped[~train_test_split]
+        test_y = labels[~train_test_split]
+        total_batches = train_x.shape[0] // batch_size
 
-    for epoch in range(training_epochs):
-      for b in range(total_batches):
-        offset = (b * batch_size) % (train_y.shape[0] - batch_size)
-        batch_x = train_x[offset:(offset + batch_size), :, :, :]
-        batch_y = train_y[offset:(offset + batch_size), :]
-        _, c = session.run([optimizer, loss],
-                           feed_dict={X: batch_x, Y: batch_y})
-      print("Epoch: ", epoch + 1, " Training Loss: ", c, " Training Accuracy: ",
-            session.run(accuracy, feed_dict={X: train_x, Y: train_y}))
-    print("Testing Accuracy:",
-          session.run(accuracy, feed_dict={X: test_x, Y: test_y}))
-    finalize_learning(saver, session, X, y_, labels_full, length)
-    exit(0)
+        for epoch in range(training_epochs):
+            for b in range(total_batches):
+                offset = (b * batch_size) % (train_y.shape[0] - batch_size)
+                batch_x = train_x[offset:(offset + batch_size), :, :, :]
+                batch_y = train_y[offset:(offset + batch_size), :]
+                _, c = session.run([optimizer, loss],
+                                   feed_dict={X: batch_x, Y: batch_y})
+            print("Epoch: ", epoch + 1, " Training Loss: ", c, " Training Accuracy: ", session.run(accuracy, feed_dict={X: train_x, Y: train_y}))
+        print("Testing Accuracy:", session.run(accuracy, feed_dict={X: test_x, Y: test_y}))
+        finalize_learning(saver, session, X, y_, labels_full, length)
+        exit(0)
 
 segments, labels_full = segment_signal(length, activities)
 reshaped = segments.reshape(len(segments), 1, length, 3)
@@ -330,13 +319,11 @@ def apply_depthwise_conv(x, kernel_size, num_channels, depth, name):
 
 
 def apply_max_pool(x, kernel_size, stride_size):
-    return tf.nn.max_pool(x, ksize=[1, 1, kernel_size, 1],
-                          strides=[1, 1, stride_size, 1], padding='VALID')
+    return tf.nn.max_pool(x, ksize=[1, 1, kernel_size, 1], strides=[1, 1, stride_size, 1], padding='VALID')
 
 
 ##############################################################################
-X = tf.placeholder(tf.float32, shape=[None, 1, length, num_channels],
-                   name=INPUT_NAME)
+X = tf.placeholder(tf.float32, shape=[None, 1, length, num_channels], name=INPUT_NAME)
 Y = tf.placeholder(tf.float32, shape=[None, num_labels], name=LABEL_NAME)
 c = apply_depthwise_conv(X, kernel_size, num_channels, depth, None)
 p = apply_max_pool(c, 20, 2)
@@ -353,8 +340,7 @@ y_ = tf.nn.softmax(tf.matmul(f, out_weights) + out_biases, name=OUTPUT_NAME)
 loss = -tf.reduce_sum(Y * tf.log(y_), name=LOSS_NAME)
 optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.0001).minimize(loss)
 correct_prediction = tf.equal(tf.argmax(y_, 1), tf.argmax(Y, 1))
-accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32),
-                          name=ACCURACY_NAME)
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32), name=ACCURACY_NAME)
 
 init_op = tf.global_variables_initializer()
 saver = tf.train.Saver()
