@@ -8,8 +8,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/recognition" />
             <option value="$PROJECT_DIR$/smartphone" />
+            <option value="$PROJECT_DIR$/wear" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
