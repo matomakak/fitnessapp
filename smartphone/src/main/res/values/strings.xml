@@ -1,0 +1,73 @@
+<resources>
+  <string name="app_name">Fitness App</string>
+  <string name="intro_text">Long click to exit the map.</string>
+  <string name="error__no_storage">Storage is not available.</string>
+  <string name="gps_not_available">No GPS on device. Will use phone GPS when available.</string>
+  <string name="gps_waiting">Waiting for GPS…</string>
+  <string name="gps_paused">Tracking paused…</string>
+  <string name="value_default">…</string>
+  <string name="result_title">RESULT</string>
+  <string name="ok">OK</string>
+  <string name="start">Start</string>
+  <string name="pause">Pause</string>
+  <string name="stop">Stop</string>
+  <string name="restart_current">Reset current</string>
+  <string name="restart_all">Restart all</string>
+  <string name="forget">Forget last</string>
+  <string name="end">End</string>
+
+  <string name="select_exercise">Select exercise</string>
+  <string name="record_rep">Record rep</string>
+  <string name="complete_rep">Complete rep</string>
+  <string name="rep_number">Number of reps</string>
+  <string name="sync">Synchronization</string>
+  <string name="download_message">Downloading recognition data</string>
+  <string name="upload_message">Uploading recognition data</string>
+
+  <string name="custom">Custom</string>
+
+  <string name="reps">reps</string>
+  <string name="max_hr">Max:</string>
+  <string name="avg_hr">Avg:</string>
+  <string name="min_hr">Min:</string>
+  <string name="bpm">bpm</string>
+  <string name="sync_fail">Sync failed: </string>
+  <string name="sync_succes">Detection data synced!</string>
+  <string name="del_succes">Delete successful!</string>
+  <string name="del_fail">Deletion failed!</string>
+
+  <string name="upload_file">recordings.csv</string>
+  <string name="upload_url">http://www.stud.fit.vutbr.cz/~xhlava39/DP/</string>
+  <string name="download_url_labels">http://www.stud.fit.vutbr.cz/~xhlava39/DP/index.php?label</string>
+  <string name="download_labels">labels.txt</string>
+  <string name="download_url_data">http://www.stud.fit.vutbr.cz/~xhlava39/DP/index.php?tf</string>
+  <string name="download_file">detect.tflite</string>
+
+  <string-array name="movements">
+    <item>Squats</item>
+    <item>Rows</item>
+    <item>Deadlifts</item>
+    <item>Bench presses</item>
+    <item>OHPs</item>
+    <item>Pull downs</item>
+    <item>Crunches</item>
+  </string-array>
+
+  <string-array name="controls">
+    <item>Start recognition</item>
+    <item>Stop recognition</item>
+  </string-array>
+
+  <string-array name="recognition">
+    <item>Recognition</item>
+    <item>ic_detect_white_48dp</item>
+  </string-array>
+  <string-array name="learning">
+    <item>Learning</item>
+    <item>ic_record_white_48dp</item>
+  </string-array>
+  <string-array name="sync">
+    <item>Sync</item>
+    <item>ic_sync_white_48dp</item>
+  </string-array>
+</resources>

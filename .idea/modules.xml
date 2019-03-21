@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/DP.iml" filepath="$PROJECT_DIR$/DP.iml" />
       <module fileurl="file://$PROJECT_DIR$/recognition/recognition.iml" filepath="$PROJECT_DIR$/recognition/recognition.iml" />
+      <module fileurl="file://$PROJECT_DIR$/smartphone/smartphone.iml" filepath="$PROJECT_DIR$/smartphone/smartphone.iml" />
     </modules>
   </component>
 </project>

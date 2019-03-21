@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  tools:context="com.hlavackamartin.fitnessapp.smartphone.activity.MainActivity">
+
+  <RelativeLayout
+    android:id="@id/toggle"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_centerHorizontal="true">
+    <ToggleButton
+      android:id="@+id/toggleRec"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:minWidth="100dp"
+      android:layout_alignParentLeft="true"
+      android:textOff="REC"
+      android:textOn="REC"/>
+
+    <ToggleButton
+      android:id="@+id/toggleAcc"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_toRightOf="@id/toggleRec"
+      android:minWidth="100dp"
+      android:textOff="ACC"
+      android:textOn="ACC"/>
+
+    <ToggleButton
+      android:id="@+id/toggle70"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_toRightOf="@id/toggleAcc"
+      android:minWidth="100dp"
+      android:textOff=">70"
+      android:textOn=">70"/>
+  </RelativeLayout>
+
+  <com.github.mikephil.charting.charts.LineChart
+    android:id="@+id/chart"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_above="@+id/toggle"/>
+
+</RelativeLayout>

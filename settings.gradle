@@ -1,1 +1,1 @@
-include ':recognition'
+include ':recognition', ':smartphone'
