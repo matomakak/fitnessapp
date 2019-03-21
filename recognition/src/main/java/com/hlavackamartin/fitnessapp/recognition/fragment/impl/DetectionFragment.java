@@ -32,8 +32,11 @@ public class DetectionFragment extends FitnessAppFragment
     implements View.OnClickListener, SensorEventListener {
 
   private static final String RECOGNITION_STARTED_BUNDLE_KEY = "RECOGNITION_STARTED_BUNDLE_KEY";
+  public static final double CONFIDENCE_THRESHOLD = 0.92;
   private boolean recognitionInProgress;
 
+  private static int SLIDING_WINDOW_JUMP;
+  private static int UPPER_WINDOW_SIZE;
   private static List<Float> x;
   private static List<Float> y;
   private static List<Float> z;
@@ -86,6 +89,8 @@ public class DetectionFragment extends FitnessAppFragment
     mSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
     mSelectedExercise = "";
     N_SAMPLES = Utilities.readSampleSize(getContext());
+    SLIDING_WINDOW_JUMP = N_SAMPLES / 6;
+    UPPER_WINDOW_SIZE = N_SAMPLES - 1;
   }
 
   @Override
@@ -159,36 +164,29 @@ public class DetectionFragment extends FitnessAppFragment
   }
 
   private void activityPrediction() {
-    if (x.size() >= N_SAMPLES && y.size() >= N_SAMPLES && z.size() >= N_SAMPLES) {
-      if (x.size() > N_SAMPLES) {
-        x.subList(N_SAMPLES, x.size()).clear();
-        y.subList(N_SAMPLES, y.size()).clear();
-        z.subList(N_SAMPLES, z.size()).clear();
-      }
+    if (x.size() == N_SAMPLES && y.size() == N_SAMPLES && z.size() == N_SAMPLES
+        && activityInference != null) {
       // Copy all x,y and z values to one array of shape N_SAMPLES*3
       input_signal.add(x);
       input_signal.add(y);
       input_signal.add(z);
       // Perform inference using Tensorflow
-      if (activityInference != null) {
-        List<Recognition> recognitions =
-            activityInference.getActivityProb(Utilities.toFloatArray(input_signal));
+      List<Recognition> recognitions = activityInference
+          .getActivityProb(Utilities.toFloatArray(input_signal));
 
-        for (Recognition r : recognitions) {
-          if (r.getConfidence() > 0.7) {
-            mSelectedExercise = r.getTitle();
-            getExerciseStat(r.getTitle()).addRep();
-            updateValue();
-            break;
-          }
+      for (Recognition r : recognitions) {
+        if (r.getConfidence() > CONFIDENCE_THRESHOLD) {
+          x.clear(); y.clear(); z.clear(); input_signal.clear();
+          mSelectedExercise = r.getTitle();
+          getExerciseStat(r.getTitle()).addRep();
+          updateValue();
+          return;
         }
       }
       // Clear half of the values
-      int upperLimit = N_SAMPLES - 1;
-      int lowerLimit = upperLimit / 2;
-      x = x.subList(lowerLimit, upperLimit);
-      y = y.subList(lowerLimit, upperLimit);
-      z = z.subList(lowerLimit, upperLimit);
+      x = x.subList(SLIDING_WINDOW_JUMP, UPPER_WINDOW_SIZE);
+      y = y.subList(SLIDING_WINDOW_JUMP, UPPER_WINDOW_SIZE);
+      z = z.subList(SLIDING_WINDOW_JUMP, UPPER_WINDOW_SIZE);
       input_signal.clear();
     }
   }

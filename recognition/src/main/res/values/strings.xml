@@ -44,6 +44,7 @@
     <string name="download_file">detect.tflite</string>
 
     <string-array name="movements">
+        <item>None</item>
         <item>Squats</item>
         <item>Rows</item>
         <item>Deadlifts</item>
