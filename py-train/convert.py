@@ -21,7 +21,7 @@ parser.add_argument('-m', '--model', dest="model",
                     help="Previously trained neuron network prefix name",
                     metavar="FILE")
 parser.add_argument('--length', dest="sample_length",
-                    help="Length of single sample", type=int)
+                    help="Length of single sample, allowed values : \'max\',\'avg\' or ANY NUMBER")
 parser.add_argument('-v', '--visualize', dest="visualize", help="Show plots of each recorded exercise",
                     action="store_true", default=False)
 parser.add_argument('--image', dest='image', help="Show image of each recorded exercise chunk",
@@ -30,6 +30,9 @@ parser.add_argument('-c', '--chunks', dest="chunks", help="Show plots of each re
                     action="store_true", default=False)
 parser.add_argument('-f', '--fourier', dest="fourier", help="Show plots of each DFT used for period estimation",
                     action="store_true", default=False)
+parser.add_argument('--estimations', dest="estimations", help="Show estimations(num. of records) of each activity",
+                    action="store_true", default=False)
+
 args = parser.parse_args()
 if args.visualize is False and args.output is None and args.image is False:
     parser.error("-o is required when -v is not set.")
@@ -39,26 +42,38 @@ if args.chunks is True and args.visualize is False:
     parser.error("-v is required when -c is set.")
 if args.fourier is True and args.visualize is False:
     parser.error("-v is required when -f is set.")
+if args.sample_length is not None and args.output is None:
+    parser.error("-o is required when --length is set.")
+
+if args.sample_length != 'max' and args.sample_length != 'avg':
+    try:
+        i = int(args.sample_length)
+    except ValueError:
+        parser.error("allowed values for --length: \'max\',\'avg\' or ANY NUMBER")
 
 
-def plot_activity_axis(ax, x, y, title):
+def plot_activity_axis(ax, x, y, title, estimation=None):
     ax.plot(x, y)
     # ax.set_title(title)
     ax.xaxis.set_visible(False)
     ax.set_ylim([min(y) - np.std(y), max(y) + np.std(y)])
     ax.set_xlim([min(x), max(x)])
     ax.grid(True)
+    if estimation:
+        for x in range(0, len(x), int(len(x) / estimation) + 1):
+            ax.axvline(x=x, color='r')
 
 
-def plot_activity(name, x, y, z):
+def plot_activity(name, x, y, z, estimation=None):
     fig, (ax0, ax1, ax2) = plt.subplots(nrows=3, figsize=(15, 10), sharex=True)
     length = len(x)
-    plot_activity_axis(ax0, range(length), x, 'x-axis')
-    plot_activity_axis(ax1, range(length), y, 'y-axis')
-    plot_activity_axis(ax2, range(length), z, 'z-axis')
+    plot_activity_axis(ax0, range(length), x, 'x-axis', estimation)
+    plot_activity_axis(ax1, range(length), y, 'y-axis', estimation)
+    plot_activity_axis(ax2, range(length), z, 'z-axis', estimation)
     plt.subplots_adjust(hspace=0.2)
     fig.suptitle(name)
     plt.subplots_adjust(top=0.90)
+    # plt.savefig("images/" + name + ".png")
     plt.show()
 
 
@@ -120,9 +135,12 @@ def estimate_period(df):
 
 
 def filter_and_estimate(data):
+    avg_max = 0
+    max_count = 0
     all_max = 0
     filtered_activities = []
-    indexes = [0] + list(idx for idx, (i, j) in enumerate(zip(data['timestamp'], data['timestamp'][1:]), 1) if (i + 1000 < j) or (i - 1000 > j))
+    indexes = [0] + list(idx for idx, (i, j) in enumerate(zip(data['timestamp'], data['timestamp'][1:]), 1) if
+                         (i + 1000 < j) or (i - 1000 > j))
     for i in range(len(indexes)):
         start = 0 if i == 0 else indexes[i] + 1
         if i + 1 < len(indexes):
@@ -139,13 +157,31 @@ def filter_and_estimate(data):
         max_est = 1 if estimated_periods < 1 else ceil(len(filtered) / estimated_periods)
         all_max = max_est if all_max < max_est else all_max
         exercise_name = exercise.iloc[0]['activity']
+
+        if max_est > 1:
+            if args.estimations:
+                print(str(max_est) + "--" + exercise_name)
+            avg_max += max_est
+            max_count += 1
+
         if exercise_name in filtered_activities:
             filtered_activities[exercise_name] = \
                 (filtered_activities[exercise_name][0].append(filtered),
                  filtered_activities[exercise_name][1] + estimation)
         else:
             filtered_activities.append((exercise_name, filtered, estimation))
-    return all_max, filtered_activities
+
+    # FIXME SHOWING AVERAGE
+    print("\n\nAVERAGE --" + str(avg_max / max_count))
+    if args.sample_length is None:
+        length = avg_max
+    elif args.sample_length == 'max':
+        length = all_max
+    elif args.sample_length == 'avg':
+        length = avg_max // max_count
+    else:
+        length = args.sample_length
+    return length, filtered_activities
 
 
 def read_data_and_filter(file_path):
@@ -157,7 +193,8 @@ def read_data_and_filter(file_path):
 
 def plot_activities_and_exit(max_len, activities_list):
     for activity, filtered, estimation in activities_list:
-        plot_activity(activity + "--" + str(estimation), filtered['x-axis'], filtered['y-axis'], filtered['z-axis'])
+        plot_activity(activity + "--" + str(estimation) + "--" + str(filtered['timestamp'].values[0]),
+                      filtered['x-axis'], filtered['y-axis'], filtered['z-axis'], estimation)
         if args.chunks:
             chunks = estimation if estimation > 0 else ceil(len(filtered) / max_len)
             for chunk in np.array_split(filtered, chunks):
@@ -205,7 +242,7 @@ def segment_signal(max_len, filtered_activities):
 
 
 def get_labels_file_content(labels, length):
-    return "#SAMPLES#" + str(length) + "\n" + "\n".join(np.unique(labels)) + "\n"
+    return "#SAMPLES#" + str(length) + "\n" + "\n".join(np.unique(labels))
 
 
 length, activities = read_data_and_filter(args.input)
@@ -275,7 +312,8 @@ if args.model is not None:
                 batch_y = train_y[offset:(offset + batch_size), :]
                 _, c = session.run([optimizer, loss],
                                    feed_dict={X: batch_x, Y: batch_y})
-            print("Epoch: ", epoch + 1, " Training Loss: ", c, " Training Accuracy: ", session.run(accuracy, feed_dict={X: train_x, Y: train_y}))
+            print("Epoch: ", epoch + 1, " Training Loss: ", c, " Training Accuracy: ",
+                  session.run(accuracy, feed_dict={X: train_x, Y: train_y}))
         print("Testing Accuracy:", session.run(accuracy, feed_dict={X: test_x, Y: test_y}))
         finalize_learning(saver, session, X, y_, labels_full, length)
         exit(0)
