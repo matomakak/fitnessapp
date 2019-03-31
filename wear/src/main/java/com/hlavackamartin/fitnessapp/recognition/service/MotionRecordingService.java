@@ -91,10 +91,11 @@ public class MotionRecordingService extends Service implements SensorEventListen
   public boolean deleteData() {
     if (recordingStatus == RecordingStatus.STOPPED) {
       try {
-        if (getFile().exists()) {
-          return getFile().delete();
+        if (!getFile().exists()) {
+          getFile().createNewFile();
         }
-      } catch (FileNotFoundException ignored) {
+        return getFile().delete();
+      } catch (IOException ignored) {
       }
     }
     return false;
