@@ -34,8 +34,7 @@ public class MotionRecordingService extends Service implements SensorEventListen
   @Override
   public IBinder onBind(Intent intent) {
     mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-    Utilities.initializeSensor(this, mSensorManager, Sensor.TYPE_ACCELEROMETER);
-    Utilities.initializeSensor(this, mSensorManager, Sensor.TYPE_HEART_RATE);
+    Utilities.initializeSensor(this, mSensorManager, Sensor.TYPE_LINEAR_ACCELERATION, null);
     recordingStatus = RecordingStatus.STOPPED;
 
     return mBinder;

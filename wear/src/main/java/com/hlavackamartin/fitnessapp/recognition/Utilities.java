@@ -8,6 +8,7 @@ import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import java.io.BufferedReader;
@@ -92,12 +93,12 @@ public class Utilities {
     return array;
   }
 
-  public static void initializeSensor(SensorEventListener listener, SensorManager sensorManager,
-      int sensorType) {
+  public static boolean initializeSensor(SensorEventListener listener, SensorManager sensorManager,
+      int sensorType, Handler handler) {
     Sensor mSensor = sensorManager.getDefaultSensor(sensorType);
-    if (mSensor != null) {
-      sensorManager.registerListener(listener, mSensor, DEFAULT_SENSOR_DURATION_US);
-    }
+    return mSensor != null && (handler != null ? 
+        sensorManager.registerListener(listener, mSensor, DEFAULT_SENSOR_DURATION_US, handler)
+        : sensorManager.registerListener(listener, mSensor, DEFAULT_SENSOR_DURATION_US));
   }
 
 
