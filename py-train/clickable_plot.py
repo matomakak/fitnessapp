@@ -33,6 +33,8 @@ class ClickablePlot:
         elif event.button == 3:
             if (self.filtered_in and self.filtered_out) or len(self.split_lines) > 1:
                 self.finished = True
+        elif event.xdata is None:
+            return
         elif self.type == ClickablePlot.Type.FILTER:
             self.filter_click(event)
         elif self.type == ClickablePlot.Type.SPLIT:
@@ -82,4 +84,4 @@ class ClickablePlot:
         if self.type == ClickablePlot.Type.FILTER:
             return [int(self.min), int(self.max) + 1]
         elif self.type == ClickablePlot.Type.SPLIT:
-            return sorted([int(lines[0].get_xdata()[0]) for lines in self.split_lines])
+            return sorted([int(lines[0].get_xdata()[0]) for lines in self.split_lines if lines[0].get_xdata()[0] is not None])
