@@ -1,5 +1,7 @@
 package com.hlavackamartin.fitnessapp.recognition.fragment.impl;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -224,7 +226,7 @@ public class LearningFragment extends FitnessAppFragment implements
 
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (requestCode == SPEECH_REQUEST_CODE) {
+    if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK) {
       try {
         List<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
         this.enableSelectedExercise(results.get(0));
