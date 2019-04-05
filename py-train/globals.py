@@ -88,7 +88,7 @@ def show_estimation():
 
 def show_fourier():
     global args
-    return args.estimation
+    return args.fourier
 
 
 def show_image():
