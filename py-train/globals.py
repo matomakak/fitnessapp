@@ -19,12 +19,13 @@ TRAINING_EPOCHS = 4
 BATCH_SIZE = 10
 LEARNING_RATE = 0.0001
 
-parser = argparse.ArgumentParser(description="Process input CSV file of recorded activities and trains CNN.")
+parser = argparse.ArgumentParser(
+    description="Process input CSV file of recorded activities and trains CNN or visualize parsed data.")
 parser.add_argument('-i', '--input', dest="input", help="CSV formatted file", metavar="FILE", required=True)
 parser.add_argument('-o', '--output', dest="output", help="Trained neuron network prefix name", metavar="FILE")
 parser.add_argument('-m', '--model', dest="model", help="Previously trained neuron network prefix name", metavar="FILE")
 parser.add_argument('--length', dest="sample_length",
-                    help="Length of single sample, allowed values : \'max\',\'avg\' or ANY NUMBER")
+                    help="Length of single sample, allowed values : \'max\',\'avg\' or ANY NUMBER", metavar='LENGTH')
 parser.add_argument('-v', '--visualize', dest="visualize", help="Show plots of each recorded exercise",
                     action="store_true", default=False)
 parser.add_argument('--image', dest='image', help="Show image of each recorded exercise chunk", action="store_true",
