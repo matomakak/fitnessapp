@@ -1,20 +1,12 @@
 <resources>
     <string name="app_name">Fitness App</string>
-    <string name="intro_text">Long click to exit the map.</string>
     <string name="error__no_storage">Storage is not available.</string>
-    <string name="gps_not_available">No GPS on device. Will use phone GPS when available.</string>
-    <string name="gps_waiting">Waiting for GPS…</string>
-    <string name="gps_paused">Tracking paused…</string>
     <string name="value_default">…</string>
-    <string name="result_title">RESULT</string>
     <string name="ok">OK</string>
     <string name="start">Start</string>
-    <string name="pause">Pause</string>
     <string name="stop">Stop</string>
     <string name="restart_current">Reset current</string>
     <string name="restart_all">Restart all</string>
-    <string name="forget">Forget last</string>
-    <string name="end">End</string>
 
     <string name="select_exercise">Select exercise</string>
     <string name="record_rep">Record rep</string>
@@ -44,7 +36,6 @@
     <string name="download_file">detect.tflite</string>
 
     <string-array name="movements">
-        <item>None</item>
         <item>Squats</item>
         <item>Rows</item>
         <item>Deadlifts</item>
