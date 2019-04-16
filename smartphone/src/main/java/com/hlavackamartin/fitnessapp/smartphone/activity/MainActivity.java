@@ -230,6 +230,7 @@ public class MainActivity extends AppCompatActivity {
 
   private boolean startRecInt() {
     if (!recStarted) {
+      recStarted = !recStarted;
       firstTimestamp = -1;
       chart.highlightValue(null);
 
