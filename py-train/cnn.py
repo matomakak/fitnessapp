@@ -111,6 +111,8 @@ class NEURAL_NETWORK:
         self.total_batches = self.train_x.shape[0] // glb.BATCH_SIZE
 
     def train(self):
+        if glb.export_graph():
+            writer = tf.summary.FileWriter(glb.EXPORT_GRAPH, self.session.graph)
         for epoch in range(glb.TRAINING_EPOCHS):
             for b in range(self.total_batches):
                 offset = (b * glb.BATCH_SIZE) % (self.train_y.shape[0] - glb.BATCH_SIZE)
@@ -121,6 +123,8 @@ class NEURAL_NETWORK:
                   self.session.run(self.accuracy, feed_dict={self.X: self.train_x, self.Y: self.train_y}))
         print("Testing Accuracy:",
               self.session.run(self.accuracy, feed_dict={self.X: self.test_x, self.Y: self.test_y}))
+        if glb.export_graph():
+            writer.close()
         self.finalize()
 
     def finalize(self):
@@ -179,7 +183,6 @@ def segment_signal(max_len, filtered_activities):
             l_labels = np.append(l_labels, activity)
 
     return l_segments, l_labels
-
 
 ###########################################
 # FREEZING AND RECOVERING + SAVING GRAPH #

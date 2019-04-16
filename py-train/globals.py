@@ -1,5 +1,7 @@
 import argparse
 
+EXPORT_GRAPH = 'graph'
+
 NAME = 'activity'
 TIMESTAMP = 'timestamp'
 X_AXIS = 'x-axis'
@@ -31,6 +33,8 @@ parser.add_argument('-v', '--visualize', dest="visualize", help="Show plots of e
 parser.add_argument('--image', dest='image', help="Show image of each recorded exercise chunk", action="store_true",
                     default=False)
 parser.add_argument('-f', '--fourier', dest="fourier", help="Show plots of each DFT used for period estimation",
+                    action="store_true", default=False)
+parser.add_argument('-g', '--graph', dest="graph", help="Exports graph designed for TensorBoard",
                     action="store_true", default=False)
 parser.add_argument('--estimations', dest="estimations", help="Show estimations(num. of records) of each activity",
                     action="store_true", default=False)
@@ -100,3 +104,8 @@ def show_image():
 def show_plot():
     global args
     return args.visualize
+
+
+def export_graph():
+    global args
+    return args.graph
