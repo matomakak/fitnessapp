@@ -36,7 +36,7 @@ def plot_activity(name, x, y, z, estimation=None, type=None):
     plot_activity_axis(ax1, range(length), y, estimation)
     plot_activity_axis(ax2, range(length), z, estimation)
     plt.subplots_adjust(hspace=0.2)
-    fig.suptitle(name)
+    fig.suptitle(name + str(estimation) if estimation else "")
     plt.subplots_adjust(top=0.90)
     if type:
         return ClickablePlot(fig, [ax0, ax1, ax2], type).wait_for_finish()

@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/DP.iml" filepath="$PROJECT_DIR$/DP.iml" />
-      <module fileurl="file://C:\Users\Martin\Desktop\DP\wear\recognition.iml" filepath="C:\Users\Martin\Desktop\DP\wear\recognition.iml" />
+      <module fileurl="file://$USER_HOME$/Desktop/DP/wear/recognition.iml" filepath="$USER_HOME$/Desktop/DP/wear/recognition.iml" />
       <module fileurl="file://$PROJECT_DIR$/smartphone/smartphone.iml" filepath="$PROJECT_DIR$/smartphone/smartphone.iml" />
       <module fileurl="file://$PROJECT_DIR$/wear/wear.iml" filepath="$PROJECT_DIR$/wear/wear.iml" />
     </modules>
