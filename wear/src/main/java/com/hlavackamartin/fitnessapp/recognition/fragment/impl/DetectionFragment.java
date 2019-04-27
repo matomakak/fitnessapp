@@ -125,7 +125,7 @@ public class DetectionFragment extends FitnessAppFragment
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
       switch (sensorEvent.sensor.getType()) {
-        case Sensor.TYPE_ACCELEROMETER:
+        case Sensor.TYPE_LINEAR_ACCELERATION:
           this.onMotionChanged(sensorEvent.values);
           break;
         case Sensor.TYPE_HEART_RATE:
@@ -147,7 +147,9 @@ public class DetectionFragment extends FitnessAppFragment
         if (dataPos >= UPPER_WINDOW_SIZE) {
           dataPos = 0;
         }
-        if (dataPos != 0 && dataPos % SLIDING_WINDOW_STEP_SIZE != 0) return;
+        if (dataPos != 0 && dataPos % SLIDING_WINDOW_STEP_SIZE != 0) {
+          return;
+        }
         // Copy all x,y and z values to one array of shape N_SAMPLES*3input_signal
         input_signal.add(x.subList(x.size() - N_SAMPLES, x.size()));
         input_signal.add(y.subList(y.size() - N_SAMPLES, y.size()));

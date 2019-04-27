@@ -17,7 +17,7 @@ import java.util.List;
 
 
 public class SyncFragment extends FitnessAppFragment implements
-    View.OnClickListener {
+    View.OnClickListener, View.OnLongClickListener {
 
   private TextView mTitle;
   private ImageButton mButton;
@@ -30,6 +30,7 @@ public class SyncFragment extends FitnessAppFragment implements
     mTitle = rootView.findViewById(R.id.sync_title);
     mButton = rootView.findViewById(R.id.sync_btn);
     mButton.setOnClickListener(this);
+    mButton.setOnLongClickListener(this);
 
     return rootView;
   }
@@ -49,8 +50,16 @@ public class SyncFragment extends FitnessAppFragment implements
   @Override
   public void onClick(View view) {
     if (mButton.isEnabled()) {
-      executeSyncTask();
+      executeUploadTask();
     }
+  }
+
+  @Override
+  public boolean onLongClick(View v) {
+    if (mButton.isEnabled()) {
+      executeDownloadTask();
+    }
+    return true;
   }
 
   private ProgressDialog createSyncDialog(SynchronizeTask.SyncActionType type) {
@@ -66,18 +75,23 @@ public class SyncFragment extends FitnessAppFragment implements
     return mProgressDialog;
   }
 
-  private void executeSyncTask() {
+  private void executeUploadTask() {
     ProgressDialog mProgressDialog;
-
-    //mProgressDialog = createSyncDialog(SynchronizeTask.SyncActionType.DOWNLOAD);
-    //final SynchronizeTask downloadTask =
-    //	new SynchronizeTask(getActivity(), mProgressDialog, SynchronizeTask.SyncActionType.DOWNLOAD);
-    //downloadTask.execute();
 
     mProgressDialog = createSyncDialog(SynchronizeTask.SyncActionType.UPLOAD);
     final SynchronizeTask uploadTask =
         new SynchronizeTask(getActivity(), mProgressDialog, SynchronizeTask.SyncActionType.UPLOAD);
     uploadTask.execute();
+  }
+
+  private void executeDownloadTask() {
+    ProgressDialog mProgressDialog;
+
+    mProgressDialog = createSyncDialog(SynchronizeTask.SyncActionType.DOWNLOAD);
+    final SynchronizeTask downloadTask =
+        new SynchronizeTask(getActivity(), mProgressDialog,
+            SynchronizeTask.SyncActionType.DOWNLOAD);
+    downloadTask.execute();
   }
 
   @Override

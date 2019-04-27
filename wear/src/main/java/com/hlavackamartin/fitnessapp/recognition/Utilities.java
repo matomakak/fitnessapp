@@ -48,8 +48,8 @@ public class Utilities {
   }
 
   /**
-   * Saves the integer value in the preference storage. If <code>value</code>
-   * is negative, then the value will be removed from the preferences.
+   * Saves the integer value in the preference storage. If <code>value</code> is negative, then the
+   * value will be removed from the preferences.
    *
    * @param context activity context
    * @param value value to be saved
@@ -96,7 +96,7 @@ public class Utilities {
   public static boolean initializeSensor(SensorEventListener listener, SensorManager sensorManager,
       int sensorType, Handler handler) {
     Sensor mSensor = sensorManager.getDefaultSensor(sensorType);
-    return mSensor != null && (handler != null ? 
+    return mSensor != null && (handler != null ?
         sensorManager.registerListener(listener, mSensor, DEFAULT_SENSOR_DURATION_US, handler)
         : sensorManager.registerListener(listener, mSensor, DEFAULT_SENSOR_DURATION_US));
   }
