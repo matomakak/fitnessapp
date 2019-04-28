@@ -1,6 +1,7 @@
-package com.hlavackamartin.fitnessapp.smartphone;
+package com.hlavackamartin.fitnessapp.smartphone.provider;
 
 import android.content.Context;
+import com.hlavackamartin.fitnessapp.smartphone.R;
 import com.hlavackamartin.fitnessapp.smartphone.data.Recognition;
 import com.hlavackamartin.fitnessapp.smartphone.utils.Utilities;
 import java.io.File;
@@ -10,7 +11,6 @@ import org.tensorflow.lite.Interpreter;
 
 public class ActivityInference {
 
-  private static final float THRESHOLD = 0.4f;
   private static ActivityInference activityInferenceInstance;
   private Interpreter tflite;
   private List<String> OUTPUT_LABELS;
@@ -41,24 +41,14 @@ public class ActivityInference {
   }
 
   private List<Recognition> getSortedResult(float[][] labelProbArray) {
-    //PriorityQueue<Recognition> pq = new PriorityQueue<>(OUTPUT_LABELS.size(),
-    //    (lhs, rhs) -> Float.compare(rhs.getConfidence(), lhs.getConfidence())
-    //);
     final ArrayList<Recognition> recognitions = new ArrayList<>();
 
     for (int i = 0; i < OUTPUT_LABELS.size(); ++i) {
       float confidence = labelProbArray[0][i];
-      //if (confidence > THRESHOLD) {
       recognitions.add(new Recognition("" + i,
           OUTPUT_LABELS.size() > i ? OUTPUT_LABELS.get(i) : "unknown",
           confidence));
-      //}
     }
-
-    //int recognitionsSize = Math.min(pq.size(), OUTPUT_LABELS.size());
-    //for (int i = 0; i < recognitionsSize; ++i) {
-    //  recognitions.add(pq.poll());
-    //}
 
     return recognitions;
   }
