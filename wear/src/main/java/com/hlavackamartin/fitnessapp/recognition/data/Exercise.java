@@ -12,6 +12,7 @@ public class Exercise {
   public Exercise(String name) {
     this.name = name;
   }
+
   public void clearStats() {
     this.reps = 0;
   }
