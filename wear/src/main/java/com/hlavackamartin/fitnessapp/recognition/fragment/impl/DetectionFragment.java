@@ -19,29 +19,33 @@ import com.hlavackamartin.fitnessapp.recognition.R;
 import com.hlavackamartin.fitnessapp.recognition.Utilities;
 import com.hlavackamartin.fitnessapp.recognition.data.Exercise;
 import com.hlavackamartin.fitnessapp.recognition.data.HeartRateData;
+import com.hlavackamartin.fitnessapp.recognition.data.InfoValueType;
 import com.hlavackamartin.fitnessapp.recognition.data.Recognition;
 import com.hlavackamartin.fitnessapp.recognition.fragment.FitnessAppFragment;
 import com.hlavackamartin.fitnessapp.recognition.provider.ActivityInference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
+import java.util.NavigableMap;
 import java.util.Optional;
+import java.util.TreeMap;
 
 
 public class DetectionFragment extends FitnessAppFragment
-    implements View.OnClickListener {
+    implements View.OnClickListener, View.OnLongClickListener {
 
   private static final String RECOGNITION_STARTED_BUNDLE_KEY = "RECOGNITION_STARTED_BUNDLE_KEY";
-  public static final double CONFIDENCE_THRESHOLD = 0.99;
+  public static final double CONFIDENCE_THRESHOLD = 0.92;
   private boolean recognitionInProgress;
 
   private SensorManager mSensorManager;
   private ActivityInference activityInference = null;
-  private HandlerThread handlerThread = new HandlerThread("worker");
-  private Handler workHandler;
+  private HandlerThread handlerThreadHR = new HandlerThread("workerHR");
+  private HandlerThread handlerThreadAcc = new HandlerThread("workerAcc");
+  private Handler workerHR;
+  private Handler workerAcc;
 
   private static int SLIDING_WINDOW_STEP_SIZE;
   private static int UPPER_WINDOW_SIZE;
@@ -54,10 +58,10 @@ public class DetectionFragment extends FitnessAppFragment
   private static List<List<Float>> input_signal;
 
   private String mSelectedExercise;
-  private ValueType mValueShowing = ValueType.REPS;
+  private InfoValueType mValueShowing = InfoValueType.REPS;
   private TextView mTitle;
   private TextView mValue;
-  private Map<String, Exercise> exerciseStats = new HashMap<>();
+  private NavigableMap<String, Exercise> exerciseStats = new TreeMap<>();
   private HeartRateData heartRateData = new HeartRateData();
 
   @Override
@@ -69,8 +73,10 @@ public class DetectionFragment extends FitnessAppFragment
   @Override
   public void onCreate(@Nullable Bundle state) {
     super.onCreate(state);
-    handlerThread.start();
-    workHandler = new Handler(handlerThread.getLooper());
+    handlerThreadAcc.start();
+    workerAcc = new Handler(handlerThreadAcc.getLooper());
+    handlerThreadHR.start();
+    workerHR = new Handler(handlerThreadHR.getLooper());
     this.recognitionInProgress =
         state != null && state.getBoolean(RECOGNITION_STARTED_BUNDLE_KEY, false);
   }
@@ -81,8 +87,10 @@ public class DetectionFragment extends FitnessAppFragment
     View rootView = inflater.inflate(R.layout.fragment_detect, container, false);
 
     mTitle = rootView.findViewById(R.id.detect_title);
+    mTitle.setText(recognitionInProgress ? "" : getString(R.string.stopped));
     mValue = rootView.findViewById(R.id.detect_value);
     mValue.setOnClickListener(this);
+    mValue.setOnLongClickListener(this);
 
     x = new ArrayList<>();
     y = new ArrayList<>();
@@ -90,7 +98,7 @@ public class DetectionFragment extends FitnessAppFragment
     input_signal = new ArrayList<>();
     activityInference = ActivityInference.getInstance(getContext());
 
-    return super.onCreateView(inflater, container, savedInstanceState);
+    return rootView;
   }
 
   @Override
@@ -118,7 +126,12 @@ public class DetectionFragment extends FitnessAppFragment
     z = new ArrayList<>(Collections.nCopies(N_SAMPLES, 0f));
     recognitionInProgress = Utilities
         .initializeSensor(mSensorEventListener, mSensorManager, Sensor.TYPE_LINEAR_ACCELERATION,
-            workHandler);
+            workerAcc);
+    Utilities
+        .initializeSensor(mSensorEventListener, mSensorManager, Sensor.TYPE_HEART_RATE, workerHR);
+    if (recognitionInProgress) {
+      mTitle.setText(R.string.detecting);
+    }
   }
 
   private final SensorEventListener mSensorEventListener = new SensorEventListener() {
@@ -160,13 +173,16 @@ public class DetectionFragment extends FitnessAppFragment
         input_signal.clear();
 
         for (Recognition r : recognitions) {
+          exerciseStats.computeIfAbsent(r.getTitle(), Exercise::new)
+              .setConfidence(r.getConfidence());
           if (r.getConfidence() > CONFIDENCE_THRESHOLD) {
-            mSelectedExercise = r.getTitle();
+            if (mSelectedExercise.equals("")) {
+              mSelectedExercise = r.getTitle();
+            }
             exerciseStats.computeIfAbsent(r.getTitle(), Exercise::new).addRep();
-            getActivity().runOnUiThread(() -> updateUI());
-            return;
           }
         }
+        getActivity().runOnUiThread(() -> updateUI());
       }
     }
 
@@ -184,7 +200,8 @@ public class DetectionFragment extends FitnessAppFragment
 
   @Override
   public void onStop() {
-    handlerThread.quitSafely();
+    handlerThreadAcc.quitSafely();
+    handlerThreadHR.quitSafely();
     super.onStop();
   }
 
@@ -196,6 +213,16 @@ public class DetectionFragment extends FitnessAppFragment
   public void onClick(View view) {
     mValueShowing = mValueShowing.next();
     updateUI();
+  }
+
+  @Override
+  public boolean onLongClick(View v) {
+    if (!exerciseStats.isEmpty() && mValueShowing == InfoValueType.REPS) {
+      Entry<String, Exercise> ex = exerciseStats.higherEntry(mSelectedExercise);
+      mSelectedExercise = ex == null ? exerciseStats.firstEntry().getKey() : ex.getKey();
+      updateUI();
+    }
+    return true;
   }
 
   @Override
@@ -235,12 +262,14 @@ public class DetectionFragment extends FitnessAppFragment
       case REPS:
         Exercise exercise = exerciseStats.get(mSelectedExercise);
         if (exercise != null) {
-          title = exercise.getName();
+          title = String.format("%s-%.0f %%", exercise.getName(), exercise.getConfidence() * 100);
           value = exercise.getReps().toString();
+        } else {
+          title = mTitle.getText().toString();
         }
         break;
     }
-    mTitle.setText(title);
+    mTitle.setText(recognitionInProgress ? title : "");
     mValue.setText(value);
   }
 
@@ -258,27 +287,5 @@ public class DetectionFragment extends FitnessAppFragment
 
   @Override
   public void onUpdateAmbient() {
-  }
-
-  public enum ValueType {
-    REPS("Reps"),
-    HR("HR"),
-    AVG_HR("Avg HR"),
-    MAX_HR("Max HR");
-
-    private static ValueType[] vals = values();
-    private final String name;
-
-    ValueType(String name) {
-      this.name = name;
-    }
-
-    public String getName() {
-      return this.name;
-    }
-
-    public ValueType next() {
-      return vals[(this.ordinal() + 1) % vals.length];
-    }
   }
 }

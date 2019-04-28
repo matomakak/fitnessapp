@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 import com.hlavackamartin.fitnessapp.recognition.R;
 import com.hlavackamartin.fitnessapp.recognition.data.MainMenuItem;
+import com.hlavackamartin.fitnessapp.recognition.data.MainMenuItem.MenuType;
 import com.hlavackamartin.fitnessapp.recognition.fragment.FitnessAppFragment;
 import com.hlavackamartin.fitnessapp.recognition.fragment.impl.DetectionFragment;
 import com.hlavackamartin.fitnessapp.recognition.fragment.impl.LearningFragment;
@@ -62,7 +63,7 @@ public class MainActivity extends WearableActivity implements
     mFragments.add(MainMenuItem.MenuType.SYNC.getPos(), new SyncFragment());
     mActiveFragment = state != null ?
         state.getInt(FRAGMENT_POSITION_BUNDLE_KEY, MainMenuItem.MenuType.LEARNING.getPos()) :
-        MainMenuItem.MenuType.LEARNING.getPos();
+        MenuType.RECOGNITION.getPos();
 
     mWearableNavigationDrawer.getController().peekDrawer();
     mWearableActionDrawer.getController().peekDrawer();

@@ -9,18 +9,18 @@
     <TextView
         android:id="@+id/detect_title"
         android:layout_above="@id/detect_value"
-        android:layout_marginBottom="15sp"
+      android:layout_marginBottom="15dp"
         android:layout_centerHorizontal="true"
-        android:textSize="15sp"
+      android:textSize="15dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="#ffffff"
-        android:text="Squats"/>
+      android:text="@string/value_default"/>
 
     <TextView
         android:id="@+id/detect_value"
         android:layout_centerInParent="true"
-        android:textSize="50sp"
+      android:textSize="50dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="#ffffff"

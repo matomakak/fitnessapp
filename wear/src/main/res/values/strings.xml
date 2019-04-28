@@ -5,6 +5,8 @@
     <string name="ok">OK</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
+    <string name="detecting">detecting...</string>
+    <string name="stopped">stopped</string>
     <string name="restart_current">Reset current</string>
     <string name="restart_all">Restart all</string>
 
