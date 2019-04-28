@@ -45,6 +45,9 @@ venv.bak/
 .virtualenvs/
 .idea/
 recordings/
+graph/
+images/
+out/
 
 # Tensorflow
 *.ckpt.*
