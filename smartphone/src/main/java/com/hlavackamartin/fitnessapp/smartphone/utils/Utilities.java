@@ -79,17 +79,22 @@ public class Utilities {
     return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
   }
 
-  public static float[][][][] toFloatArray(List<List<Float>> list) {
-    int i = 0;
-    int j;
+  public static float[][][][] toFloatArray(List<List<Float>> list, float scaling) {
+    int axis = 0;
+    int i, j;
     float[][][][] array = new float[1][1][list.get(0).size()][list.size()];
+    float ir = 1.0f / 20;
 
     for (List<Float> l : list) {
-      j = 0;
-      for (Float f : l) {
-        array[0][0][j++][i] = (f != null ? f : Float.NaN);
+      for (i = 0; i < l.size(); i++) {
+        for (j = 0; j < 20; j++) {
+          if (i - j < 0) {
+            continue;
+          }
+          array[0][0][i][axis] += (l.get(i - j) / scaling) * ir;
+        }
       }
-      i++;
+      axis++;
     }
     return array;
   }

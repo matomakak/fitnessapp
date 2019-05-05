@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Button;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import com.github.mikephil.charting.charts.LineChart;
@@ -30,7 +31,9 @@ import com.hlavackamartin.fitnessapp.smartphone.utils.Utilities;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,12 +46,11 @@ public class MainActivity extends AppCompatActivity {
   private Handler workHandler2;
 
   private int N_SAMPLES = -1;
-  private int dataPos = 0;
   private long firstTimestamp = -1;
   private static List<List<Float>> input_signal = new ArrayList<>();
-  private List<Float> recordingDataX;
-  private List<Float> recordingDataY;
-  private List<Float> recordingDataZ;
+  private Queue<Float> recordingDataX;
+  private Queue<Float> recordingDataY;
+  private Queue<Float> recordingDataZ;
 
   private LineChart chart;
   private static final int X_INDEX = 0;
@@ -71,10 +73,12 @@ public class MainActivity extends AppCompatActivity {
   private ToggleButton toggleRec;
   private ToggleButton toggleAcc;
   private ToggleButton toggle70;
+  private Button btnScale;
 
   private boolean recStarted = false;
   private boolean showAccelerometer = false;
   private boolean showAbove70Only = false;
+  private int scaling = 1;
   /**
    * called from worker thread
    */
@@ -91,23 +95,19 @@ public class MainActivity extends AppCompatActivity {
       final float floatTimestampMicros = (event.timestamp - firstTimestamp) / 1000000f;
       if (event.sensor.getType() != Sensor.TYPE_LINEAR_ACCELERATION) {
 
-        recordingDataX.set(dataPos, event.values[0]); // DATA_NORMALIZATION_COEF;
-        recordingDataY.set(dataPos, event.values[1]); // DATA_NORMALIZATION_COEF;
-        recordingDataZ.set(dataPos, event.values[2]); // DATA_NORMALIZATION_COEF;
-        dataPos++;
-        if (dataPos >= N_SAMPLES - 1) {
-          dataPos = 0;
-        }
+        recordingDataX.add(event.values[0]);
+        recordingDataY.add(event.values[1]);
+        recordingDataZ.add(event.values[2]);
+        recordingDataX.remove();
+        recordingDataY.remove();
+        recordingDataZ.remove();
 
-        input_signal
-            .add(recordingDataX.subList(recordingDataX.size() - N_SAMPLES, recordingDataX.size()));
-        input_signal
-            .add(recordingDataY.subList(recordingDataY.size() - N_SAMPLES, recordingDataY.size()));
-        input_signal
-            .add(recordingDataZ.subList(recordingDataZ.size() - N_SAMPLES, recordingDataZ.size()));
+        input_signal.add((List) recordingDataX);
+        input_signal.add((List) recordingDataY);
+        input_signal.add((List) recordingDataZ);
         // Perform inference using Tensorflow
         final List<Recognition> recognitions = activityInference
-            .getActivityProb(Utilities.toFloatArray(input_signal));
+            .getActivityProb(Utilities.toFloatArray(input_signal, (float) scaling));
 
         input_signal.clear();
         runOnUiThread(
@@ -171,6 +171,7 @@ public class MainActivity extends AppCompatActivity {
     chart = findViewById(R.id.chart);
     toggleRec = findViewById(R.id.toggleRec);
     toggleAcc = findViewById(R.id.toggleAcc);
+    btnScale = findViewById(R.id.btnScale);
     toggle70 = findViewById(R.id.toggle70);
 
     toggleRec.setOnClickListener(view -> {
@@ -184,12 +185,16 @@ public class MainActivity extends AppCompatActivity {
       showAccelerometer = !showAccelerometer;
       toggleAcc.setChecked(showAccelerometer);
     });
+    btnScale.setText(String.valueOf(scaling));
+    btnScale.setOnClickListener(view -> {
+      scaling = scaling > 8 ? 1 : scaling + 1;
+      btnScale.setText(String.format("1/%d", scaling));
+    });
     toggle70.setOnClickListener(view -> {
       showAbove70Only = !showAbove70Only;
       toggle70.setChecked(showAbove70Only);
     });
 
-    //chart.setLogEnabled(true);
     chart.setTouchEnabled(true);
     chart.setData(new LineData());
     chart.getLineData().setValueTextColor(Color.WHITE);
@@ -234,10 +239,9 @@ public class MainActivity extends AppCompatActivity {
       firstTimestamp = -1;
       chart.highlightValue(null);
 
-      recordingDataX = new ArrayList<>(Collections.nCopies(N_SAMPLES, 0f));
-      recordingDataY = new ArrayList<>(Collections.nCopies(N_SAMPLES, 0f));
-      recordingDataZ = new ArrayList<>(Collections.nCopies(N_SAMPLES, 0f));
-      dataPos = 0;
+      recordingDataX = new LinkedList<>(Collections.nCopies(N_SAMPLES, 0f));
+      recordingDataY = new LinkedList<>(Collections.nCopies(N_SAMPLES, 0f));
+      recordingDataZ = new LinkedList<>(Collections.nCopies(N_SAMPLES, 0f));
 
       Utilities
           .initializeSensor(sensorEventListener, mSensorManager, TYPE_ACCELEROMETER, workHandler1);
@@ -261,7 +265,9 @@ public class MainActivity extends AppCompatActivity {
     for (Recognition recognition : recognitions) {
       if (probabilityTimestamp > 0) {
         float conf = recognition.getConfidence();
-        if (showAbove70Only && conf < 0.7) conf = 0f;
+        if (showAbove70Only && conf < 0.7) {
+          conf = 0f;
+        }
         addPoint(Integer.parseInt(recognition.getId()) + 3, probabilityTimestamp, conf * 10);
       }
     }

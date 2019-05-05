@@ -30,11 +30,19 @@
       android:textOff="ACC"
       android:textOn="ACC"/>
 
+    <Button
+      android:id="@+id/btnScale"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_toRightOf="@id/toggleAcc"
+      android:minWidth="100dp"
+      android:text="1"/>
+
     <ToggleButton
       android:id="@+id/toggle70"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_toRightOf="@id/toggleAcc"
+      android:layout_toRightOf="@id/btnScale"
       android:minWidth="100dp"
       android:textOff=">70"
       android:textOn=">70"/>
