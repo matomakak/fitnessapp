@@ -21,25 +21,46 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Main ACTIVITY class providing functionality for selecting module and showing it's content
+ */
 public class MainActivity extends WearableActivity implements
     WearableNavigationDrawerView.OnItemSelectedListener,
     MenuItem.OnMenuItemClickListener {
 
+  /**
+   * Bundle key for current selected module retrieval
+   */
   private static final String FRAGMENT_POSITION_BUNDLE_KEY = "FRAGMENT_POSITION_BUNDLE_KEY";
-
+  /**
+   * Available modules represented by Fragment
+   */
   private List<FitnessAppFragment> mFragments = new ArrayList<>();
+  /**
+   * Current selected module
+   */
   private int mActiveFragment;
 
   private NavigationAdapter mNavigationAdapter;
   private WearableNavigationDrawerView mWearableNavigationDrawer;
   private WearableActionDrawerView mWearableActionDrawer;
 
+  /**
+   * Providing functionality for saving current selected module
+   *
+   * @param outState used to store information
+   */
   @Override
   public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
     outState.putInt(FRAGMENT_POSITION_BUNDLE_KEY, mActiveFragment);
     super.onSaveInstanceState(outState, outPersistentState);
   }
 
+  /**
+   * Initialization of supporting objects and setting application behaviour
+   *
+   * @param state last selected module holder
+   */
   @Override
   protected void onCreate(Bundle state) {
     super.onCreate(state);
@@ -69,6 +90,9 @@ public class MainActivity extends WearableActivity implements
     mWearableActionDrawer.getController().peekDrawer();
   }
 
+  /**
+   * Repopulation of current fragment after application regains focus
+   */
   @Override
   protected void onResume() {
     super.onResume();
@@ -76,6 +100,9 @@ public class MainActivity extends WearableActivity implements
     mWearableNavigationDrawer.setCurrentItem(mActiveFragment, false);
   }
 
+  /**
+   * Population of current selected module and its' data
+   */
   private void updateCurrentFragment() {
     if (getCurrentFragment().isPresent()) {
       FragmentManager fragmentManager = getFragmentManager();
@@ -118,6 +145,12 @@ public class MainActivity extends WearableActivity implements
     mNavigationAdapter.executeAction(position);
   }
 
+  /**
+   * Bottom menu execution functionality through fragments' implementation
+   *
+   * @param menuItem selected item
+   * @return event consumed
+   */
   @Override
   public boolean onMenuItemClick(MenuItem menuItem) {
     boolean res =
@@ -127,6 +160,9 @@ public class MainActivity extends WearableActivity implements
     return res;
   }
 
+  /**
+   * Support for ambient mode in Wear
+   */
   @Override
   public void onEnterAmbient(Bundle ambientDetails) {
     super.onEnterAmbient(ambientDetails);
@@ -135,6 +171,9 @@ public class MainActivity extends WearableActivity implements
     mWearableActionDrawer.getController().closeDrawer();
   }
 
+  /**
+   * Support for ambient mode in Wear
+   */
   @Override
   public void onExitAmbient() {
     super.onExitAmbient();
@@ -143,6 +182,9 @@ public class MainActivity extends WearableActivity implements
     mWearableActionDrawer.getController().peekDrawer();
   }
 
+  /**
+   * Implementation for Top menu functionality
+   */
   private final class NavigationAdapter
       extends WearableNavigationDrawerView.WearableNavigationDrawerAdapter {
 
@@ -173,12 +215,20 @@ public class MainActivity extends WearableActivity implements
       return mMainMenu.get(pos).getName();
     }
 
+    /**
+     * Retrieval of image button via strings resource
+     */
     @Override
     public Drawable getItemDrawable(int pos) {
       return mContext.getDrawable(mContext.getResources()
           .getIdentifier(mMainMenu.get(pos).getImage(), "drawable", getPackageName()));
     }
 
+    /**
+     * Setting active module and updating content after selection
+     *
+     * @param pos selected module position in navigation drawer
+     */
     void executeAction(int pos) {
       mActiveFragment = mMainMenu.get(pos).getType().getPos();
       updateCurrentFragment();

@@ -1,6 +1,9 @@
 package com.hlavackamartin.fitnessapp.recognition.data;
 
-
+/**
+ * Enumeration used for selecting which type of data user sees in detection module. Provided types
+ * are: reps and average, max and current heart rate.
+ */
 public enum InfoValueType {
   REPS("Reps"),
   HR("HR"),

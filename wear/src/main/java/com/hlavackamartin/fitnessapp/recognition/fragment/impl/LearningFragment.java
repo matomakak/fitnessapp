@@ -34,6 +34,9 @@ import java.util.List;
 import java.util.Locale;
 
 
+/**
+ * Implementation for data collecting within learning module
+ */
 public class LearningFragment extends FitnessAppFragment implements
     View.OnClickListener,
     NumberPicker.OnValueChangeListener {
@@ -49,6 +52,9 @@ public class LearningFragment extends FitnessAppFragment implements
 
   private boolean mServiceBound = false;
   private MotionRecordingService mService;
+  /**
+   * Connection between activity and data recording service {@link MotionRecordingService}
+   */
   private ServiceConnection mServiceConnection = new ServiceConnection() {
     @Override
     public void onServiceConnected(ComponentName className, IBinder service) {
@@ -63,18 +69,27 @@ public class LearningFragment extends FitnessAppFragment implements
     }
   };
 
+  /**
+   * Providing functionality for storing selected exercise for data collection while app is paused
+   */
   @Override
   public void onSaveInstanceState(Bundle outState) {
     outState.putString(EXERCISE_BUNDLE_KEY, selectedExercise);
     super.onSaveInstanceState(outState);
   }
 
+  /**
+   * Retrieval of last selected exercise before app was paused
+   */
   @Override
   public void onCreate(@Nullable Bundle state) {
     super.onCreate(state);
     selectedExercise = state != null ? state.getString(EXERCISE_BUNDLE_KEY, "") : "";
   }
 
+  /**
+   * Creates UI components and checks possibility for external application dir write access
+   */
   @Override
   public View onCreateView(
       LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -93,6 +108,9 @@ public class LearningFragment extends FitnessAppFragment implements
     return rootView;
   }
 
+  /**
+   * Repopulates UI when app is resumed
+   */
   @Override
   public void onResume() {
     super.onResume();
@@ -109,6 +127,12 @@ public class LearningFragment extends FitnessAppFragment implements
     }
   }
 
+  /**
+   * When exercise name for collection of data purposes selected allowing user to click to start
+   * learning/collection process
+   *
+   * @param name name of selected exercise
+   */
   private void enableSelectedExercise(String name) {
     selectedExercise = name;
     mTitle.setText(selectedExercise);
@@ -117,6 +141,9 @@ public class LearningFragment extends FitnessAppFragment implements
     }
   }
 
+  /**
+   * Click on button provides start/stop functionality for learning/collection process
+   */
   @Override
   public void onClick(View view) {
     if (mButton.isEnabled() && mServiceBound) {
@@ -129,6 +156,10 @@ public class LearningFragment extends FitnessAppFragment implements
     }
   }
 
+  /**
+   * Showing simple count down dialog for user preparation purposes before starting collecting data
+   * via {@link MotionRecordingService}
+   */
   public void showStartCountDownDialog() {
     AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
     alertDialog.setTitle("Start in");
@@ -151,6 +182,10 @@ public class LearningFragment extends FitnessAppFragment implements
     }.start();
   }
 
+  /**
+   * Adds vibration within start of collection/learning process to inform user Removes UI indication
+   * when process stopped
+   */
   public void startRecording() {
     this.indicateRepProcessing(true); //To show animation as soon as possible
     if (mService.startRepRecording(selectedExercise)) {
@@ -160,6 +195,11 @@ public class LearningFragment extends FitnessAppFragment implements
     }
   }
 
+  /**
+   * Uses simple indeterminate circular progress bar around button to indicate ongoing process
+   *
+   * @param processing show/hide indication
+   */
   public void indicateRepProcessing(boolean processing) {
     if (mProgressBar != null) {
       mProgressBar.setVisibility(processing ? View.VISIBLE : View.GONE);
@@ -173,6 +213,12 @@ public class LearningFragment extends FitnessAppFragment implements
     }
   }
 
+  /**
+   * finished recording process and updates UID
+   *
+   * @param showRepCountInput possibility to use deprecated {@link NumberPickerDialog} for number of
+   * reps input
+   */
   public void stopRecordingData(boolean showRepCountInput) {
     this.indicateRepProcessing(false);
     mService.stopRepRecording(showRepCountInput);
@@ -187,6 +233,9 @@ public class LearningFragment extends FitnessAppFragment implements
     newFragment.show(getFragmentManager(), "Rep count");
   }
 
+  /**
+   * Implementation for value from {@link NumberPickerDialog}
+   */
   @Override
   public void onValueChange(NumberPicker numberPicker, int i, int i1) {
     //AFTER NUMBER PICKER DIALOG
@@ -195,6 +244,11 @@ public class LearningFragment extends FitnessAppFragment implements
     }
   }
 
+  /**
+   * Provides types of exercise within bottom menu
+   *
+   * @return list of types of exercises
+   */
   @Override
   public List<String> getActionMenu(Resources resources) {
     List<String> list =
@@ -203,6 +257,12 @@ public class LearningFragment extends FitnessAppFragment implements
     return list;
   }
 
+  /**
+   * Implementation for bottom menu and its' functionality
+   *
+   * @param menuItem selected menu item
+   * @return consumed event
+   */
   @Override
   public boolean onMenuItemClick(MenuItem menuItem) {
     if (menuItem.getTitle().equals(getString(R.string.restart_all))) {
@@ -224,6 +284,10 @@ public class LearningFragment extends FitnessAppFragment implements
     return true;
   }
 
+  /**
+   * Implementation for supporting speach recognition within custom menu item allowing users'
+   * personalized exercise name
+   */
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK) {
@@ -242,6 +306,9 @@ public class LearningFragment extends FitnessAppFragment implements
     super.onDestroy();
   }
 
+  /**
+   * Functionality for destroying connection between application and {@link MotionRecordingService}
+   */
   private void endTask() {
     if (mServiceBound) {
       getActivity().unbindService(mServiceConnection);
@@ -249,16 +316,25 @@ public class LearningFragment extends FitnessAppFragment implements
     }
   }
 
+  /**
+   * Support for ambient mode
+   */
   @Override
   public void onEnterAmbient(Bundle bundle) {
     mTitle.getPaint().setAntiAlias(false);
   }
 
+  /**
+   * Support for ambient mode
+   */
   @Override
   public void onExitAmbient() {
     mTitle.getPaint().setAntiAlias(true);
   }
 
+  /**
+   * Support for ambient mode
+   */
   @Override
   public void onUpdateAmbient() {
   }

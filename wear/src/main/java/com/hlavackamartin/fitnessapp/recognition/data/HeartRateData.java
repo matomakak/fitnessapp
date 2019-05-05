@@ -1,5 +1,9 @@
 package com.hlavackamartin.fitnessapp.recognition.data;
 
+/**
+ * Class for storing heartrate information for whole detection process Provides information about
+ * current, average and max heart rate
+ */
 public class HeartRateData {
 
   private Integer currentHR = 0;

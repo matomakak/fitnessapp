@@ -1,6 +1,9 @@
 package com.hlavackamartin.fitnessapp.recognition.data;
 
-
+/**
+ * Provides functionality for storing information about available modules in app. Current state
+ * allows recognition, learning and synchronization module
+ */
 public class MainMenuItem {
 
   private MenuType type;

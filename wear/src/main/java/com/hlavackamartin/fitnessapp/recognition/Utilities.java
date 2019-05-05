@@ -34,7 +34,6 @@ public class Utilities {
    * Method causes device to vibrate for the given duration (in millis). If duration is set to 0,
    * then it will use the <code>DEFAULT_VIBRATION_DURATION_MS</code>.
    *
-   * @param context activity context
    * @param duration duration of vibration in ms
    */
   public static void vibrate(Context context, Integer duration) {
@@ -51,7 +50,6 @@ public class Utilities {
    * Saves the integer value in the preference storage. If <code>value</code> is negative, then the
    * value will be removed from the preferences.
    *
-   * @param context activity context
    * @param value value to be saved
    */
   public static void savePreference(Context context, String value) {
@@ -62,7 +60,6 @@ public class Utilities {
   /**
    * Retrieves the value of counter from preference manager. If no value exists, it will return 0.
    *
-   * @param context activity context
    * @return saved preference value
    */
   public static String getPreference(Context context) {
@@ -70,6 +67,11 @@ public class Utilities {
     return pref.getString(PREF_KEY, null);
   }
 
+  /**
+   * Checks network availability
+   *
+   * @return current network availability
+   */
   public static boolean isNetworkConnectionAvailable(Context context) {
     ConnectivityManager cm =
         (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -78,6 +80,10 @@ public class Utilities {
     return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
   }
 
+  /**
+   * Parses data structure used in collection functionality within application to neural network
+   * readable data
+   */
   public static float[][][][] toFloatArray(List<List<Float>> list) {
     int axis = 0;
     int i, j;
@@ -98,6 +104,14 @@ public class Utilities {
     return array;
   }
 
+  /**
+   * Provides functionality to initialize sensor reading for given context
+   *
+   * @param listener given context listener
+   * @param sensorType type of sensor to subscribe to
+   * @param handler thread handler to avoid overly use UI thread
+   * @return success of subscription
+   */
   public static boolean initializeSensor(SensorEventListener listener, SensorManager sensorManager,
       int sensorType, Handler handler) {
     Sensor mSensor = sensorManager.getDefaultSensor(sensorType);
@@ -106,7 +120,13 @@ public class Utilities {
         : sensorManager.registerListener(listener, mSensor, DEFAULT_SENSOR_DURATION_US));
   }
 
-
+  /**
+   * Retrieves file according to name from external application dir
+   *
+   * @param fileName name of file
+   * @return found file
+   * @throws FileNotFoundException when no file was found
+   */
   public static File getFile(Context context, String fileName) throws FileNotFoundException {
     File path = context.getExternalFilesDir(null);
     if (null == path) {
@@ -120,16 +140,30 @@ public class Utilities {
     return new File(path.getPath() + File.separator + fileName);
   }
 
-
+  /**
+   * Checks write permissions for external application dir
+   *
+   * @return possibility to write in external application dir
+   */
   public static boolean isExternalStorageWritable() {
     String state = Environment.getExternalStorageState();
     return Environment.MEDIA_MOUNTED.equals(state);
   }
 
+  /**
+   * Reads support file for neural network containing sorted labels of exercises.
+   *
+   * @return list of exercise names
+   */
   public static List<String> readRecognitionLabels(Context context) {
     return readAttributesFile(context, true);
   }
 
+  /**
+   * Reads support file for neural network containg size of datasets used for training cnn.
+   *
+   * @return required size for dataset fed to neural network
+   */
   public static int readSampleSize(Context context) {
     List<String> data = readAttributesFile(context, false);
     for (String config : data) {
@@ -144,6 +178,12 @@ public class Utilities {
     return -1;
   }
 
+  /**
+   * Common functionality for {@link #readRecognitionLabels(Context)} (Context, boolean)} and {@link
+   * #readSampleSize(Context)}
+   *
+   * @param readLabels reading labels or sample size
+   */
   private static List<String> readAttributesFile(Context context, boolean readLabels) {
     FileInputStream fstream;
     try {

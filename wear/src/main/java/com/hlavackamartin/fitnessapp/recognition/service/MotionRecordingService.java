@@ -18,7 +18,10 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.Optional;
 
-
+/**
+ * Class providing functionality for learning module. Contains logic for sensor subscription and
+ * parsing and writing recorded data within service type of application component
+ */
 public class MotionRecordingService extends Service implements SensorEventListener {
 
   private final IBinder mBinder = new LocalBinder();
@@ -31,6 +34,9 @@ public class MotionRecordingService extends Service implements SensorEventListen
   private FileOutputStream writer;
   private File recordFile = null;
 
+  /**
+   * When binded to activity, subscribe to sensor
+   */
   @Override
   public IBinder onBind(Intent intent) {
     mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -40,6 +46,9 @@ public class MotionRecordingService extends Service implements SensorEventListen
     return mBinder;
   }
 
+  /**
+   * When unbinded from activity unsubscribes from sensor
+   */
   @Override
   public boolean onUnbind(Intent intent) {
     mSensorManager.unregisterListener(this);
@@ -52,10 +61,19 @@ public class MotionRecordingService extends Service implements SensorEventListen
     return super.onUnbind(intent);
   }
 
+  /**
+   * @return Current state of recording
+   */
   public RecordingStatus getRecordingStatus() {
     return this.recordingStatus;
   }
 
+  /**
+   * Start recording process
+   *
+   * @param name name of exercise recorded
+   * @return success of staring
+   */
   public boolean startRepRecording(String name) {
     if (recordingStatus == RecordingStatus.STOPPED) {
       loadWriter();
@@ -66,6 +84,12 @@ public class MotionRecordingService extends Service implements SensorEventListen
     return false;
   }
 
+  /**
+   * Provides functionality for deprecated implementation of number of reps selection after
+   * finishing recording
+   *
+   * @param reps number of executed reps within last recording
+   */
   public void setRepsForFinishedRecording(Integer reps) {
     if (recordingStatus == RecordingStatus.WAITING_FOR_REPS && writer != null) {
       try {
@@ -79,6 +103,11 @@ public class MotionRecordingService extends Service implements SensorEventListen
     }
   }
 
+  /**
+   * Stops recording process
+   *
+   * @param shouldWaitForRepsProviding indicated that number of reps will be provided shortly
+   */
   public void stopRepRecording(boolean shouldWaitForRepsProviding) {
     if (recordingStatus == RecordingStatus.RECORDING) {
       recordingStatus = RecordingStatus.WAITING_FOR_REPS;
@@ -88,6 +117,11 @@ public class MotionRecordingService extends Service implements SensorEventListen
     }
   }
 
+  /**
+   * Deletes all previously recorded data
+   *
+   * @return success of operation
+   */
   public boolean deleteData() {
     if (recordingStatus == RecordingStatus.STOPPED) {
       try {
@@ -101,6 +135,12 @@ public class MotionRecordingService extends Service implements SensorEventListen
     return false;
   }
 
+  /**
+   * Retrieves cached file
+   *
+   * @return recordings file
+   * @throws FileNotFoundException when file not found
+   */
   private File getFile() throws FileNotFoundException {
     if (recordFile == null) {
       recordFile = Utilities.getFile(this, getString(R.string.upload_file));
@@ -108,6 +148,9 @@ public class MotionRecordingService extends Service implements SensorEventListen
     return recordFile;
   }
 
+  /**
+   * Initializes writer for recordings file
+   */
   private void loadWriter() {
     if (writer == null) {
       try {
@@ -122,6 +165,11 @@ public class MotionRecordingService extends Service implements SensorEventListen
     return Optional.ofNullable(writer);
   }
 
+  /**
+   * Implementation of data obtaining and writing to file from sensor in specified format
+   *
+   * @param sensorEvent data from sensor
+   */
   @Override
   public void onSensorChanged(SensorEvent sensorEvent) {
     if (recordingStatus == RecordingStatus.RECORDING && writer != null) {
@@ -154,12 +202,18 @@ public class MotionRecordingService extends Service implements SensorEventListen
   public void onAccuracyChanged(Sensor sensor, int i) {
   }
 
+  /**
+   * Status indication of state of recording process
+   */
   public enum RecordingStatus {
     RECORDING,
     WAITING_FOR_REPS,
     STOPPED
   }
 
+  /**
+   * Provides connection between activity and service via bounded connection
+   */
   public class LocalBinder extends Binder {
 
     public MotionRecordingService getService() {

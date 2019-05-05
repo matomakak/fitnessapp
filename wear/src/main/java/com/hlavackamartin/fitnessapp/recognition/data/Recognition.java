@@ -1,6 +1,8 @@
 package com.hlavackamartin.fitnessapp.recognition.data;
 
-
+/**
+ * Class representing recognition data for each recognized movement via CNN.
+ */
 public class Recognition {
 
   /**

@@ -32,17 +32,28 @@ import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.TreeMap;
 
-
+/**
+ * Implementation for neural network inference and detection module
+ */
 public class DetectionFragment extends FitnessAppFragment
     implements View.OnClickListener, View.OnLongClickListener {
 
   private static final String RECOGNITION_STARTED_BUNDLE_KEY = "RECOGNITION_STARTED_BUNDLE_KEY";
+  /**
+   * Threshold for accepting detection as valid rep, while 1.0 is max value
+   */
   public static final double CONFIDENCE_THRESHOLD = 0.92;
   private boolean recognitionInProgress;
 
   private SensorManager mSensorManager;
   private ActivityInference activityInference = null;
+  /**
+   * thread used within heart rate parsing
+   */
   private HandlerThread handlerThreadHR = new HandlerThread("workerHR");
+  /**
+   * thread used within accelerometer data parsing for neural network
+   */
   private HandlerThread handlerThreadAcc = new HandlerThread("workerAcc");
   private Handler workerHR;
   private Handler workerAcc;
@@ -70,6 +81,9 @@ public class DetectionFragment extends FitnessAppFragment
     super.onSaveInstanceState(savedInstanceState);
   }
 
+  /**
+   * Initializes threads and retrieves last state of recognition(was running before app pause
+   */
   @Override
   public void onCreate(@Nullable Bundle state) {
     super.onCreate(state);
@@ -101,6 +115,9 @@ public class DetectionFragment extends FitnessAppFragment
     return rootView;
   }
 
+  /**
+   * Resets all data and reads support information for neural network
+   */
   @Override
   public void onStart() {
     super.onStart();
@@ -111,6 +128,9 @@ public class DetectionFragment extends FitnessAppFragment
     SLIDING_WINDOW_STEP_SIZE = N_SAMPLES / 4;
   }
 
+  /**
+   * When paused and resumed, restarts previous state
+   */
   @Override
   public void onResume() {
     super.onResume();
@@ -119,6 +139,9 @@ public class DetectionFragment extends FitnessAppFragment
     }
   }
 
+  /**
+   * Resets data and prepare for new recognition process. Subscribes to sensor
+   */
   private void startTask() {
     dataPos = 0;
     x = new ArrayList<>(Collections.nCopies(N_SAMPLES, 0f));
@@ -134,6 +157,9 @@ public class DetectionFragment extends FitnessAppFragment
     }
   }
 
+  /**
+   * Listener used to differenciate type of sensor and providing implementation of parsing data
+   */
   private final SensorEventListener mSensorEventListener = new SensorEventListener() {
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
@@ -151,6 +177,13 @@ public class DetectionFragment extends FitnessAppFragment
     public void onAccuracyChanged(Sensor sensor, int i) {
     }
 
+    /**
+     * Motion data parsing and feeding to neural network. Jumping window is used so lower
+     * computational power of wearable can handle. Execute inference process and parses result
+     * with visual indication on UI.
+     *
+     * @param values data from sensor
+     */
     private void onMotionChanged(float[] values) {
       if (activityInference != null) {
         x.set(dataPos, values[0]);
@@ -198,6 +231,9 @@ public class DetectionFragment extends FitnessAppFragment
     super.onPause();
   }
 
+  /**
+   * When application stopped, destroying running threads
+   */
   @Override
   public void onStop() {
     handlerThreadAcc.quitSafely();
@@ -205,16 +241,25 @@ public class DetectionFragment extends FitnessAppFragment
     super.onStop();
   }
 
+  /**
+   * Unregisters from sensor
+   */
   private void endTask() {
     mSensorManager.unregisterListener(mSensorEventListener);
   }
 
+  /**
+   * Cycling through showed data on UI via click on value
+   */
   @Override
   public void onClick(View view) {
     mValueShowing = mValueShowing.next();
     updateUI();
   }
 
+  /**
+   * Cycling through exercise types recorded via long click on value
+   */
   @Override
   public boolean onLongClick(View v) {
     if (!exerciseStats.isEmpty() && mValueShowing == InfoValueType.REPS) {
@@ -230,6 +275,12 @@ public class DetectionFragment extends FitnessAppFragment
     return new ArrayList<>(Arrays.asList(resources.getStringArray(R.array.controls)));
   }
 
+  /**
+   * Provides functionality for bottom menu and behaviour of each entry
+   *
+   * @param menuItem selected bottom menu item
+   * @return consumed click
+   */
   @Override
   public boolean onMenuItemClick(MenuItem menuItem) {
     if (menuItem.getTitle().equals(getString(R.string.restart_current))) {
@@ -244,6 +295,10 @@ public class DetectionFragment extends FitnessAppFragment
     return true;
   }
 
+  /**
+   * Updated UI with current values according to showed type of data selected via {@link
+   * #onClick(View)}
+   */
   private void updateUI() {
     String title = mValueShowing.getName();
     String value = "...";
@@ -273,18 +328,27 @@ public class DetectionFragment extends FitnessAppFragment
     mValue.setText(value);
   }
 
+  /**
+   * Support for ambient mode
+   */
   @Override
   public void onEnterAmbient(Bundle bundle) {
     mTitle.getPaint().setAntiAlias(false);
     mValue.getPaint().setAntiAlias(false);
   }
 
+  /**
+   * Support for ambient mode
+   */
   @Override
   public void onExitAmbient() {
     mTitle.getPaint().setAntiAlias(true);
     mValue.getPaint().setAntiAlias(true);
   }
 
+  /**
+   * Support for ambient mode
+   */
   @Override
   public void onUpdateAmbient() {
   }

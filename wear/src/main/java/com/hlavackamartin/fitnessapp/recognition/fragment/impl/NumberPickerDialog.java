@@ -7,7 +7,11 @@ import android.os.Bundle;
 import android.widget.NumberPicker;
 import com.hlavackamartin.fitnessapp.recognition.R;
 
-
+/**
+ * Provides deprecated functionality for user allowing him to specify number of reps executed within
+ * one recording session
+ */
+@Deprecated
 public class NumberPickerDialog extends DialogFragment {
 
   private NumberPicker.OnValueChangeListener valueChangeListener;

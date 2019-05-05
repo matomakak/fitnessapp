@@ -15,7 +15,10 @@ import com.hlavackamartin.fitnessapp.recognition.fragment.FitnessAppFragment;
 import com.hlavackamartin.fitnessapp.recognition.task.SynchronizeTask;
 import java.util.List;
 
-
+/**
+ * Implementation for synchronization module for easy upload/download of data for training and
+ * recognition purposes
+ */
 public class SyncFragment extends FitnessAppFragment implements
     View.OnClickListener, View.OnLongClickListener {
 
@@ -35,6 +38,10 @@ public class SyncFragment extends FitnessAppFragment implements
     return rootView;
   }
 
+  /**
+   * After selection of module checks possibility to write to application external dir and provides
+   * feedback to user viac text field
+   */
   @Override
   public void onResume() {
     super.onResume();
@@ -47,6 +54,9 @@ public class SyncFragment extends FitnessAppFragment implements
     }
   }
 
+  /**
+   * Execution of uploading process within single tap on button
+   */
   @Override
   public void onClick(View view) {
     if (mButton.isEnabled()) {
@@ -54,6 +64,9 @@ public class SyncFragment extends FitnessAppFragment implements
     }
   }
 
+  /**
+   * Execution of downloading process within long hold on button
+   */
   @Override
   public boolean onLongClick(View v) {
     if (mButton.isEnabled()) {
@@ -62,6 +75,12 @@ public class SyncFragment extends FitnessAppFragment implements
     return true;
   }
 
+  /**
+   * Creates progress dialog indicating ongoing upload/download process
+   *
+   * @param type type of executed process (upload/download)
+   * @return progress dialog with proper naming
+   */
   private ProgressDialog createSyncDialog(SynchronizeTask.SyncActionType type) {
     ProgressDialog mProgressDialog;
     mProgressDialog = new ProgressDialog(getActivity());
@@ -75,6 +94,9 @@ public class SyncFragment extends FitnessAppFragment implements
     return mProgressDialog;
   }
 
+  /**
+   * Execution of uploading process via {@link SynchronizeTask}
+   */
   private void executeUploadTask() {
     ProgressDialog mProgressDialog;
 
@@ -84,6 +106,9 @@ public class SyncFragment extends FitnessAppFragment implements
     uploadTask.execute();
   }
 
+  /**
+   * Execution of downloading process via {@link SynchronizeTask}
+   */
   private void executeDownloadTask() {
     ProgressDialog mProgressDialog;
 

@@ -9,6 +9,10 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * Provides functionality for downloading large files viac HTTP. Serves for downloading trained
+ * neural network binary
+ */
 public class InputStreamVolleyRequest extends Request<byte[]> {
 
   private final Response.Listener<byte[]> mListener;

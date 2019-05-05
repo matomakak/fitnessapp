@@ -20,14 +20,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 
-
+/**
+ * Class providing functionality for synchronization purposes including upload and download
+ * possibility
+ */
 public class SynchronizeTask {
 
   private Context context;
   private PowerManager.WakeLock mWakeLock;
   private ProgressDialog dialog;
   private SyncActionType type;
-
+  /**
+   * Queue storing current requests made
+   */
   private RequestQueue mRequestQueue;
   private int mRequestQueueCount;
 
@@ -38,6 +43,9 @@ public class SynchronizeTask {
     this.type = type;
   }
 
+  /**
+   * Triggering of execution process for either upload or download functionality
+   */
   public void execute() {
     onPreExecute();
     switch (type) {
@@ -64,6 +72,12 @@ public class SynchronizeTask {
     }
   }
 
+  /**
+   * Connects to endpoint specified in string resources and uploads recorded data from learning
+   * module
+   *
+   * @param file recorded data from learning module
+   */
   private void uploadData(File file) {
     mRequestQueue = Volley.newRequestQueue(context);
     StringRequest postRequest = new StringRequest(Request.Method.POST,
@@ -83,6 +97,10 @@ public class SynchronizeTask {
     mRequestQueue.add(postRequest);
   }
 
+  /**
+   * Connects to endpoint specified in string resources and download data. Download first support
+   * file for neural network and then trained neural network file itself.
+   */
   private void downloadData() {
     InputStreamVolleyRequest labelsRequest = new InputStreamVolleyRequest(Request.Method.GET,
         context.getString(R.string.download_url_labels),
@@ -141,6 +159,9 @@ public class SynchronizeTask {
     mRequestQueue.add(tfRequest);
   }
 
+  /**
+   * For synchronization purposes requires wake lock to prevent device going to sleep
+   */
   private void onPreExecute() {
     mRequestQueueCount = 0;
     // take CPU lock to prevent CPU from going off if the user
@@ -151,6 +172,11 @@ public class SynchronizeTask {
     dialog.show();
   }
 
+  /**
+   * releases wake lock and finishes whole synchronization process
+   *
+   * @param errorMsg empty if successful
+   */
   private void onPostExecute(String errorMsg) {
     if (--mRequestQueueCount < 1 || errorMsg != null) {
       if (mRequestQueueCount > 0) {
@@ -169,6 +195,9 @@ public class SynchronizeTask {
     }
   }
 
+  /**
+   * Type of synchronization process
+   */
   public enum SyncActionType {
     DOWNLOAD,
     UPLOAD

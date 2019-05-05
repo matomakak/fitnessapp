@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.PriorityQueue;
 import org.tensorflow.lite.Interpreter;
 
+/**
+ * Providing functionality for communication with neural network base on Tensorflow implementation.
+ * Implementing initialization, feeding data and resolving result from CNN.
+ */
 public class ActivityInference {
 
   private static final float THRESHOLD = 0.1f;
@@ -17,7 +21,9 @@ public class ActivityInference {
   private Interpreter tflite;
   private List<String> OUTPUT_LABELS;
 
-
+  /**
+   * Initialize neural network. Reads available types of exercises.
+   */
   private ActivityInference(final Context context) {
     OUTPUT_LABELS = Utilities.readRecognitionLabels(context);
     File model;
@@ -29,6 +35,9 @@ public class ActivityInference {
     tflite = new Interpreter(model);
   }
 
+  /**
+   * Supports singleton principles
+   */
   public static ActivityInference getInstance(final Context context) {
     if (activityInferenceInstance == null) {
       activityInferenceInstance = new ActivityInference(context);
@@ -36,12 +45,24 @@ public class ActivityInference {
     return activityInferenceInstance;
   }
 
+  /**
+   * Feeds data to neural network and parses results
+   *
+   * @param inputSignal dataset for recognition purposes
+   * @return list of recognized exercises and confidence in their validity
+   */
   public List<Recognition> getActivityProb(float[][][][] inputSignal) {
     float[][] result = new float[1][OUTPUT_LABELS.size()];
     tflite.run(inputSignal, result);
     return getSortedResult(result);
   }
 
+  /**
+   * Parses 2D array to readable list of {@link Recognition} data
+   *
+   * @param labelProbArray 2D array of results straight from CNN
+   * @return sorted and parsed data
+   */
   private List<Recognition> getSortedResult(float[][] labelProbArray) {
     PriorityQueue<Recognition> pq = new PriorityQueue<>(OUTPUT_LABELS.size(),
         (lhs, rhs) -> Float.compare(rhs.getConfidence(), lhs.getConfidence())

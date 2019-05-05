@@ -1,18 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6850935a-f187-49fb-abe9-569f152d4198" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/../.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clickable_plot.py" beforeDir="false" afterPath="$PROJECT_DIR$/clickable_plot.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cnn.py" beforeDir="false" afterPath="$PROJECT_DIR$/cnn.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/convert.py" beforeDir="false" afterPath="$PROJECT_DIR$/convert.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/globals.py" beforeDir="false" afterPath="$PROJECT_DIR$/globals.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../smartphone/src/main/java/com/hlavackamartin/fitnessapp/smartphone/activity/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../smartphone/src/main/java/com/hlavackamartin/fitnessapp/smartphone/activity/MainActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../smartphone/src/main/java/com/hlavackamartin/fitnessapp/smartphone/utils/Utilities.java" beforeDir="false" afterPath="$PROJECT_DIR$/../smartphone/src/main/java/com/hlavackamartin/fitnessapp/smartphone/utils/Utilities.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../smartphone/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../smartphone/src/main/res/layout/activity_main.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../wear/src/main/java/com/hlavackamartin/fitnessapp/recognition/Utilities.java" beforeDir="false" afterPath="$PROJECT_DIR$/../wear/src/main/java/com/hlavackamartin/fitnessapp/recognition/Utilities.java" afterDir="false" />
-    </list>
+    <list default="true" id="6850935a-f187-49fb-abe9-569f152d4198" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -226,9 +215,9 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Python.cnn" />
       <item itemvalue="Python.convert" />
       <item itemvalue="Python.test" />
-      <item itemvalue="Python.cnn" />
     </list>
     <recent_temporary>
       <list>
@@ -254,16 +243,15 @@
       <workItem from="1556809121217" duration="450000" />
       <workItem from="1556875235818" duration="14695000" />
       <workItem from="1556991185350" duration="1170000" />
-      <workItem from="1557028997159" duration="2622000" />
+      <workItem from="1557028997159" duration="3058000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="38272000" />
+    <option name="totallyTimeSpent" value="38708000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1696" height="1026" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1589242" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />

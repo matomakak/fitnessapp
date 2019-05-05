@@ -1,5 +1,9 @@
 package com.hlavackamartin.fitnessapp.recognition.data;
 
+/**
+ * Class for storing information of recorded/executed/detecte exercise. Provides information about
+ * number of reps detected and confidency of last detected rep from CNN
+ */
 public class Exercise {
 
   private String name;
