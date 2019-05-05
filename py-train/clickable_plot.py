@@ -84,4 +84,5 @@ class ClickablePlot:
         if self.type == ClickablePlot.Type.FILTER:
             return [int(self.min), int(self.max) + 1]
         elif self.type == ClickablePlot.Type.SPLIT:
-            return sorted([int(lines[0].get_xdata()[0]) for lines in self.split_lines if lines[0].get_xdata()[0] is not None])
+            return sorted(
+                [int(lines[0].get_xdata()[0]) for lines in self.split_lines if lines[0].get_xdata()[0] is not None])

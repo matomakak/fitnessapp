@@ -4,8 +4,8 @@ import warnings
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
+import json
 import pandas as pd
-import numpy as np
 from math import ceil
 import matplotlib.pyplot as plt
 
@@ -36,7 +36,7 @@ def plot_activity(name, x, y, z, estimation=None, type=None):
     plot_activity_axis(ax1, range(length), y, estimation)
     plot_activity_axis(ax2, range(length), z, estimation)
     plt.subplots_adjust(hspace=0.2)
-    fig.suptitle(name + str(estimation) if estimation else "")
+    fig.suptitle(name)
     plt.subplots_adjust(top=0.90)
     if type:
         return ClickablePlot(fig, [ax0, ax1, ax2], type).wait_for_finish()
@@ -115,6 +115,9 @@ def filter_and_estimate(data):
         else:
             end = -1
         exercise = data.iloc[start:end]
+        exercise[X_AXIS] = convolve1d(exercise[X_AXIS].values)
+        exercise[Y_AXIS] = convolve1d(exercise[Y_AXIS].values)
+        exercise[Z_AXIS] = convolve1d(exercise[Z_AXIS].values)
 
         exercise_name = exercise.iloc[0][NAME]
 
@@ -131,11 +134,29 @@ def filter_and_estimate(data):
                 avg_max += max_est
                 max_count += 1
         else:
-            min_max = plot_activity("FILTER START & FINISH", exercise[X_AXIS], exercise[Y_AXIS], exercise[Z_AXIS],
-                                    type=ClickablePlot.Type.FILTER)
-            filtered = exercise.iloc[min_max[0]:min_max[1]]
-            estimation = plot_activity("SELECT CHUNKS", filtered[X_AXIS], filtered[Y_AXIS], filtered[Z_AXIS],
-                                       type=ClickablePlot.Type.SPLIT)
+            found = None
+            if filter_input():
+                for entry in filter_input_data:
+                    if (entry['info']['timestamp'] == int(exercise[TIMESTAMP].iloc[0])):
+                        found = entry
+                        break
+            if found is not None:
+                min_max = [found['filter']['min'], found['filter']['max']]
+                filtered = exercise.iloc[min_max[0]:min_max[1]]
+                estimation = found['chunks']
+            else:
+                min_max = plot_activity("FILTER START & FINISH", exercise[X_AXIS], exercise[Y_AXIS], exercise[Z_AXIS],
+                                        type=ClickablePlot.Type.FILTER)
+                filtered = exercise.iloc[min_max[0]:min_max[1]]
+                estimation = plot_activity("SELECT CHUNKS", filtered[X_AXIS], filtered[Y_AXIS], filtered[Z_AXIS],
+                                           type=ClickablePlot.Type.SPLIT)
+                if export_filter():
+                    filter_entry = {}
+                    filter_entry['info'] = {'name': exercise_name, 'timestamp': int(exercise[TIMESTAMP].iloc[0])}
+                    filter_entry['filter'] = {'min': min_max[0], 'max': min_max[1]}
+                    filter_entry['chunks'] = estimation
+                    filter_output_data.append(filter_entry)
+
             idxs = [0] + estimation + [len(filtered) - 1]
             diffs = [x - idxs[i - 1] for i, x in enumerate(idxs) if i > 0]
             max_est = max(diffs)
@@ -189,14 +210,21 @@ def plot_images_and_exit(length, activities_list):
 
 
 ##############################################################################
+filter_output_data = []
+if filter_input():
+    with open(filter_input()) as json_file:
+        filter_input_data = json.load(json_file)
 length, activities = read_data_and_filter(input_file())
+if export_filter():
+    with open(input_file + '.filtered_data', 'w') as outfile:
+        json.dump(filter_output_data, outfile)
 
 if show_image():
     plot_images_and_exit(length, activities)
 
 if show_plot():
     for activity, filtered, estimation in activities:
-        plot_activity(activity + "--" + str(estimation) + "--" + str(filtered[TIMESTAMP].values[0]),
+        plot_activity(activity + "--" + str(filtered[TIMESTAMP].values[0]),
                       filtered[X_AXIS], filtered[Y_AXIS], filtered[Z_AXIS], estimation)
     plt.waitforbuttonpress()
     exit(0)

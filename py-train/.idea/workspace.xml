@@ -2,9 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6850935a-f187-49fb-abe9-569f152d4198" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/../.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../wear/src/main/java/com/hlavackamartin/fitnessapp/recognition/fragment/impl/DetectionFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/../wear/src/main/java/com/hlavackamartin/fitnessapp/recognition/fragment/impl/DetectionFragment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clickable_plot.py" beforeDir="false" afterPath="$PROJECT_DIR$/clickable_plot.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cnn.py" beforeDir="false" afterPath="$PROJECT_DIR$/cnn.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/convert.py" beforeDir="false" afterPath="$PROJECT_DIR$/convert.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/globals.py" beforeDir="false" afterPath="$PROJECT_DIR$/globals.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../smartphone/src/main/java/com/hlavackamartin/fitnessapp/smartphone/activity/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../smartphone/src/main/java/com/hlavackamartin/fitnessapp/smartphone/activity/MainActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../smartphone/src/main/java/com/hlavackamartin/fitnessapp/smartphone/utils/Utilities.java" beforeDir="false" afterPath="$PROJECT_DIR$/../smartphone/src/main/java/com/hlavackamartin/fitnessapp/smartphone/utils/Utilities.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../smartphone/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../smartphone/src/main/res/layout/activity_main.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../wear/src/main/java/com/hlavackamartin/fitnessapp/recognition/Utilities.java" beforeDir="false" afterPath="$PROJECT_DIR$/../wear/src/main/java/com/hlavackamartin/fitnessapp/recognition/Utilities.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -20,8 +27,23 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/convert.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="747">
-              <caret line="203" selection-start-line="203" selection-end-line="203" />
+            <state relative-caret-position="653">
+              <caret line="226" selection-start-line="226" selection-end-line="226" />
+              <folding>
+                <element signature="e#0#10#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/globals.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="273">
+              <caret line="60" column="46" selection-start-line="60" selection-start-column="46" selection-end-line="60" selection-end-column="46" />
+              <folding>
+                <element signature="e#0#15#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -29,8 +51,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/cnn.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="153">
-              <caret line="17" selection-start-line="17" selection-end-line="17" />
+            <state relative-caret-position="672">
+              <caret line="50" selection-start-line="50" selection-end-line="50" />
             </state>
           </provider>
         </entry>
@@ -48,11 +70,19 @@
       <find>'</find>
       <find>&quot;</find>
       <find>sample_length</find>
+      <find>filterRecord</find>
+      <find>extendRecordsLen</find>
+      <find>filter_value</find>
+      <find>augmentData</find>
+      <find>records</find>
+      <find>#</find>
+      <find>normalize_axis</find>
     </findStrings>
     <replaceStrings>
       <replace>lngth</replace>
       <replace>OUTPUT_NAME</replace>
       <replace>&quot;</replace>
+      <replace>,\n</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -61,14 +91,22 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
+        <option value="$PROJECT_DIR$/data/new.csv" />
+        <option value="$PROJECT_DIR$/data/squat_2.csv" />
+        <option value="$PROJECT_DIR$/test" />
+        <option value="$PROJECT_DIR$/test.exported" />
+        <option value="$PROJECT_DIR$/parts.exported" />
+        <option value="$PROJECT_DIR$/cnn.py" />
         <option value="$PROJECT_DIR$/convert.py" />
+        <option value="$PROJECT_DIR$/globals.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="-7" />
-    <option name="width" value="1294" />
-    <option name="height" value="1047" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="329" />
+    <option name="y" value="101" />
+    <option name="width" value="854" />
+    <option name="height" value="1017" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -76,6 +114,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -83,19 +122,29 @@
               <item name="py-train" type="b2602c69:ProjectViewProjectNode" />
               <item name="py-train" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="py-train" type="b2602c69:ProjectViewProjectNode" />
+              <item name="py-train" type="462c0819:PsiDirectoryNode" />
+              <item name="recordings" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/.virtualenvs" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/data" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="PyScientificConfigurable" />
+    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.Python" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\!PROJECTS\DP\py-train\data" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -109,7 +158,29 @@
       </list>
     </option>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.convert">
+    <configuration name="cnn" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="py-train" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/cnn.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="convert" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="py-train" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -124,7 +195,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/convert.py" />
-      <option name="PARAMETERS" value="-o 27-04 -i recordings/new.csv --length=max" />
+      <option name="PARAMETERS" value="-o 05-05 -i recordings/new.csv --length=max -f test.exported" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -132,9 +203,38 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="py-train" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.convert" />
+      <item itemvalue="Python.test" />
+      <item itemvalue="Python.cnn" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.convert" />
+        <item itemvalue="Python.cnn" />
+        <item itemvalue="Python.test" />
       </list>
     </recent_temporary>
   </component>
@@ -150,36 +250,43 @@
       <updated>1544604757541</updated>
       <workItem from="1556289785650" duration="1538000" />
       <workItem from="1556338084699" duration="4740000" />
+      <workItem from="1556788976015" duration="13057000" />
+      <workItem from="1556809121217" duration="450000" />
+      <workItem from="1556875235818" duration="14695000" />
+      <workItem from="1556991185350" duration="1170000" />
+      <workItem from="1557028997159" duration="2622000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="6278000" />
+    <option name="totallyTimeSpent" value="38272000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="0" width="1294" height="1047" extended-state="0" />
+    <frame x="-8" y="-8" width="1696" height="1026" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.20259319" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1589242" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32932165" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.50875276" />
-      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49941656" weight="0.32822758" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32922733" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.5531915" />
+      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49941656" weight="0.57894737" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="8" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Terminal" order="9" />
+      <window_info anchor="bottom" id="Terminal" order="9" weight="0.32960895" />
       <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5005834" side_tool="true" weight="0.312749" />
-      <window_info anchor="bottom" id="Version Control" order="11" weight="0.32932165" />
-      <window_info anchor="bottom" id="Python Console" order="12" weight="0.32972974" />
+      <window_info anchor="bottom" id="Version Control" order="11" weight="0.3281075" />
+      <window_info anchor="bottom" id="Python Console" order="12" weight="0.7704367" />
       <window_info anchor="bottom" id="Concurrent Activities Diagram" order="13" weight="0.32939914" />
+      <window_info anchor="bottom" id="Jupyter" order="14" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" auto_hide="true" id="SciView" order="3" show_stripe_button="false" type="FLOATING" weight="0.26094005" />
+      <window_info anchor="right" auto_hide="true" x="557" y="237" width="566" height="535" id="SciView" order="3" show_stripe_button="false" type="FLOATING" weight="0.43581906" />
       <window_info anchor="right" id="Database" order="4" />
     </layout>
   </component>
@@ -190,14 +297,19 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/convert.py</url>
-          <line>203</line>
-          <option name="timeStamp" value="141" />
+          <url>file://$PROJECT_DIR$/cnn.py</url>
+          <line>192</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/cnn.py</url>
+          <line>50</line>
+          <option name="timeStamp" value="11" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/convert.py</url>
-          <line>151</line>
-          <option name="timeStamp" value="142" />
+          <line>226</line>
+          <option name="timeStamp" value="12" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -212,61 +324,122 @@
       <configuration name="PythonConfigurationType">
         <watch expression="labels" />
         <watch expression="converter_kwargs['default_ranges_stats']" />
+        <watch expression="data" />
+        <watch expression="l_segments.size" />
       </configuration>
     </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/py_train$convert.coverage" NAME="convert Coverage Results" MODIFIED="1556344966348" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/py_train$test.coverage" NAME="test Coverage Results" MODIFIED="1556800586638" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/py_train$convert.coverage" NAME="convert Coverage Results" MODIFIED="1557030021525" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/py_train$cnn.coverage" NAME="cnn Coverage Results" MODIFIED="1556805184058" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="debuggerHistoryManager">
     <expressions id="evaluateCodeFragment">
       <expression>
-        <expression-string>avg_max // max_count</expression-string>
+        <expression-string>def convolve1d(signal):
+    ir = np.ones(30) / 30
+
+    output = np.zeros_like(signal)
+
+    for i in range(len(signal)):
+        for j in range(len(ir)):
+            if i - j &lt; 0:
+                continue
+            output[i] += (signal[i - j]) * ir[j]
+
+    return output
+
+
+plot_activity(activity + &quot;--&quot; + str(filtered[TIMESTAMP].values[0]),
+                      convolve1d(filtered[X_AXIS].values), convolve1d(filtered[Y_AXIS].values), convolve1d(filtered[Z_AXIS].values), estimation)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>tf.nn.depthwise_conv2d(x, W, [1, 1, 1, 1], padding='VALID')</expression-string>
+        <expression-string>def convolve1d(signal):
+    ir = np.ones(20) / 20
+
+    output = np.zeros_like(signal)
+
+    for i in range(len(signal)):
+        for j in range(len(ir)):
+            if i - j &lt; 0:
+                continue
+            output[i] += (signal[i - j]) * ir[j]
+
+    return output
+
+
+plot_activity(activity + &quot;--&quot; + str(filtered[TIMESTAMP].values[0]),
+                      convolve1d(filtered[X_AXIS].values/9), convolve1d(filtered[Y_AXIS].values/9), convolve1d(filtered[Z_AXIS].values/9), estimation)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>df['activity'].values[0].lower()</expression-string>
+        <expression-string>def convolve1d(signal):
+    ir = np.ones(20) / 20
+
+    output = np.zeros_like(signal)
+
+    for i in range(len(signal)):
+        for j in range(len(ir)):
+            if i - j &lt; 0:
+                continue
+            output[i] += (signal[i - j]/9) * ir[j]
+
+    return output
+
+
+plot_activity(activity + &quot;--&quot; + str(filtered[TIMESTAMP].values[0]),
+                      convolve1d(filtered[X_AXIS].values), convolve1d(filtered[Y_AXIS].values), convolve1d(filtered[Z_AXIS].values), estimation)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>df['activity']</expression-string>
+        <expression-string>plot_activity(activity + &quot;--&quot; + str(filtered[TIMESTAMP].values[0]),
+                      convolve1d(filtered[X_AXIS].values), convolve1d(filtered[Y_AXIS].values), convolve1d(filtered[Z_AXIS].values), estimation)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>df['activity'][0]</expression-string>
+        <expression-string>plot_activity(activity + &quot;--&quot; + str(filtered[TIMESTAMP].values[0]),
+                      convolve1d(filtered[X_AXIS]), convolve1d(filtered[Y_AXIS]), convolve1d(filtered[Z_AXIS]), estimation)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>signal.resample(chunk[&quot;x-axis&quot;].values, 50)</expression-string>
+        <expression-string>filtered[X_AXIS] = convolve1d(filtered[X_AXIS].values)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>chunk[&quot;x-axis&quot;].values</expression-string>
+        <expression-string>filtered[X_AXIS]</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>X.shape.dims[2].value</expression-string>
+        <expression-string>filtered</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>X.shape.dims[2]</expression-string>
+        <expression-string>data.iloc[start:end][X_AXIS] = convolve1d(data.iloc[start:end][X_AXIS].values)</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
     </expressions>
     <expressions id="setValue">
+      <expression>
+        <expression-string>int(1556337588029)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>1556337588029</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
       <expression>
         <expression-string>121</expression-string>
         <language-id>Python</language-id>
@@ -302,15 +475,6 @@
     <entry file="file://$USER_HOME$/.virtualenvs1/Lib/site-packages/tensorflow/python/training/checkpoint_management.py" />
     <entry file="file://$USER_HOME$/.virtualenvs1/Lib/site-packages/tensorflow/python/training/saver.py" />
     <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python35/Lib/codecs.py" />
-    <entry file="file://$PROJECT_DIR$/clickable_plot.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/tensorflow/lite/python/convert.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="190">
@@ -318,24 +482,85 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/globals.py">
+    <entry file="file://$PROJECT_DIR$/training.ipynb.txt" />
+    <entry file="file://$PROJECT_DIR$/clickable_plot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="190">
-          <caret line="80" selection-start-line="80" selection-end-line="80" />
+        <state relative-caret-position="96">
+          <caret line="6" column="12" selection-start-line="6" selection-start-column="12" selection-end-line="6" selection-end-column="12" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/matplotlib/pyplot.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/squat_2.csv" />
+    <entry file="file://$PROJECT_DIR$/training.ipynb" />
+    <entry file="file://$PROJECT_DIR$/test" />
+    <entry file="file://$PROJECT_DIR$/recordings/one.csv">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/recordings/new.csv">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-173741">
+          <caret line="4" column="38" selection-end-line="10885" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="151">
+          <caret line="1134" selection-start-line="1134" selection-end-line="1134" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/pandas/core/frame.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="163">
+          <caret line="2893" selection-start-line="2893" selection-end-line="2893" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/parts.exported">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="446">
+          <caret line="187" column="1" selection-start-line="187" selection-start-column="1" selection-end-line="187" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.exported">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1916">
+          <caret line="19" column="13" lean-forward="true" selection-end-line="187" selection-end-column="1" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/cnn.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="17" selection-start-line="17" selection-end-line="17" />
+        <state relative-caret-position="672">
+          <caret line="50" selection-start-line="50" selection-end-line="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/globals.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="273">
+          <caret line="60" column="46" selection-start-line="60" selection-start-column="46" selection-end-line="60" selection-end-column="46" />
+          <folding>
+            <element signature="e#0#15#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/convert.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="747">
-          <caret line="203" selection-start-line="203" selection-end-line="203" />
+        <state relative-caret-position="653">
+          <caret line="226" selection-start-line="226" selection-end-line="226" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

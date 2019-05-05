@@ -1,9 +1,9 @@
 import os
-from math import ceil
 
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+from math import ceil
 from scipy import signal
 
 import globals as glb
@@ -175,9 +175,17 @@ def segment_signal(max_len, filtered_activities):
         else:
             chunks = estimation
         for chunk in np.array_split(filtered, chunks):
-            x = signal.resample(chunk[glb.X_AXIS].values, max_len)
-            y = signal.resample(chunk[glb.Y_AXIS].values, max_len)
-            z = signal.resample(chunk[glb.Z_AXIS].values, max_len)
+            x = chunk[glb.X_AXIS].values
+            y = chunk[glb.Y_AXIS].values
+            z = chunk[glb.Z_AXIS].values
+            if len(x) > max_len:
+                x = signal.resample(x, max_len)
+                y = signal.resample(y, max_len)
+                z = signal.resample(z, max_len)
+            else:
+                x = np.pad(x, (0, max_len - len(x)), mode='constant', constant_values=0)
+                y = np.pad(y, (0, max_len - len(y)), mode='constant', constant_values=0)
+                z = np.pad(z, (0, max_len - len(z)), mode='constant', constant_values=0)
 
             l_segments = np.vstack([l_segments, np.dstack([x, y, z])])
             l_labels = np.append(l_labels, activity)

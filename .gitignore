@@ -53,4 +53,5 @@ out/
 *.ckpt.*
 *.labels
 *.tflite
+*.exported
 checkpoint
