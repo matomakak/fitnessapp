@@ -5,9 +5,15 @@ import matplotlib.pyplot as plt
 
 
 class ClickablePlot:
+    """
+    Class providing functionality for interactive graph allowing to identify specific features of data
+    """
     class Type(Enum):
-        FILTER = 1
-        SPLIT = 2
+        """
+        Enum providing type of graph
+        """
+        FILTER = 1  # used for in and out filtering
+        SPLIT = 2  # used for repetition separation within one dataset
 
     def __init__(self, fig, axs, plot_type):
         self.fig = fig
@@ -28,6 +34,10 @@ class ClickablePlot:
         self.fig.canvas.mpl_connect('pick_event', self.line_onclick)
 
     def onclick(self, event):
+        """
+        Parses click event within graph and according to type delegates request for processing
+        :param event: click event
+        """
         if self.consumed:
             self.consumed = False
         elif event.button == 3:
@@ -41,6 +51,10 @@ class ClickablePlot:
             self.split_click(event)
 
     def filter_click(self, event):
+        """
+        Filter type graph click funtionality showing in and out parts greyed out which are identified
+        :param event: click event
+        """
         if event.xdata > (self.x_max / 2):
             for aspan in self.aspan_list_out:
                 aspan.remove()
@@ -59,6 +73,11 @@ class ClickablePlot:
                 self.aspan_list_in.append(ax.axvspan(0, self.min, facecolor='0.9', alpha=0.5))
 
     def split_click(self, event):
+        """
+        Exercise repetition identification type graph click functionality allowing to specify parts of graph which
+        should be separated
+        :param event: click event
+        """
         x = [event.xdata, event.xdata]
         y = [-100, 100]
         added_lines = []
@@ -68,6 +87,10 @@ class ClickablePlot:
         self.split_lines.append(added_lines)
 
     def line_onclick(self, event):
+        """
+        Functionality allowing to manipulate with already created lines within SPLIT type graph
+        :param event: click event
+        """
         if event.mouseevent.button == 3:
             for lines in self.split_lines:
                 if event.artist in lines:
@@ -78,6 +101,12 @@ class ClickablePlot:
             self.consumed = True
 
     def wait_for_finish(self):
+        """
+        Functionality allowing to close graph under specific circumstances according to graph type
+        :return: case of:
+            FILTER - array containing in and out points
+            SPLIT - array of all separations made within graph
+        """
         while not self.finished:
             plt.waitforbuttonpress()
         plt.close(self.fig)

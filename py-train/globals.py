@@ -4,24 +4,24 @@ import numpy as np
 
 EXPORT_GRAPH = 'graph'
 
-NAME = 'activity'
-TIMESTAMP = 'timestamp'
-X_AXIS = 'x-axis'
-Y_AXIS = 'y-axis'
-Z_AXIS = 'z-axis'
+NAME = 'activity'  # identifying column name for exercise name in CSV input file
+TIMESTAMP = 'timestamp'  # identifying column name for timestamp in CSV input file
+X_AXIS = 'x-axis'  # identifying column name for x-axis values from sensor in CSV input file
+Y_AXIS = 'y-axis'  # identifying column name for y-axis values from sensor in CSV input file
+Z_AXIS = 'z-axis'  # identifying column name for z-axis values from sensor in CSV input file
 
-INPUT_NAME = "I"
-LABEL_NAME = "Y"
-C_NAME = "c"
-LOSS_NAME = "Neg"
-ACCURACY_NAME = "accuracy"
-OUTPUT_NAME = "O"
-RETRAIN_MODEL_SUFFIX = ':0'
+INPUT_NAME = "I"  # identifying name of input data tensor within model
+LABEL_NAME = "Y"  # identifying name of input label tensor within model
+C_NAME = "c"  # identifying name of c tensor within model
+LOSS_NAME = "Neg"  # identifying name of loss function tensor within model
+ACCURACY_NAME = "accuracy"  # identifying name of accuracy tensor within model
+OUTPUT_NAME = "O"  # identifying name of output tensor within model
+RETRAIN_MODEL_SUFFIX = ':0'  # identifying name of suffix for tensors used to retrain within model
 
-NUM_CHANNELS = 3
-TRAINING_EPOCHS = 4
-BATCH_SIZE = 10
-LEARNING_RATE = 0.0001
+NUM_CHANNELS = 3  # channels within data used to train (X,Y,Z axes)
+TRAINING_EPOCHS = 4  # number of epoch used in training
+BATCH_SIZE = 10  # batch size used in data preparation part for training
+LEARNING_RATE = 0.0001  # learning rate within training cnn
 
 parser = argparse.ArgumentParser(
     description="Process input CSV file of recorded activities and trains CNN or visualize parsed data.")
@@ -50,6 +50,7 @@ parser.add_argument('--auto-filter', dest="auto_filter",
 
 
 def convolve1d(signal):
+    """Applies simple convolution(window size 20, each 20/20) to array of values"""
     ir = np.ones(20) / 20
 
     output = np.zeros_like(signal)
@@ -64,6 +65,7 @@ def convolve1d(signal):
 
 
 def initialize_and_validate_globals():
+    """Parses and validates all argument options + custom dependency between them"""
     global args
     args = parser.parse_args()
     if args.visualize is False and args.output is None and args.image is False:
@@ -86,65 +88,72 @@ def initialize_and_validate_globals():
 
 
 def sample_length():
+    """Returns argument identifying length of single sample used to resize"""
     global args
     return args.sample_length
 
 
 def output_name():
+    """Returns argument identifying output file name without extension"""
     global args
     return args.output
 
 
 def export_filter():
+    """Returns argument identifying if manual filter process should be recorded and exported"""
     global args
     return args.export_filter
 
 
 def filter_input():
+    """Returns argument identifying manual filter export file name to use"""
     global args
     return args.filter_input
 
 
-def export_filter():
-    global args
-    return args.export_filter
-
-
 def is_auto_filter():
+    """Returns argument identifying if automatic filter should be used"""
     global args
     return args.auto_filter
 
 
 def is_retraining():
+    """Returns argument identifying if already trained model was provided"""
     global args
     return args.model is not None
 
 
 def input_file():
+    """Returns argument identifying input CSV file"""
     global args
     return args.input
 
 
 def show_estimation():
+    """Returns argument identifying if estimations of sample size should be printed"""
     global args
     return args.estimations
 
 
 def show_fourier():
+    """Returns argument identifying if fourier based estimation graphs should be shown"""
     global args
     return args.fourier
 
 
 def show_image():
+    """Returns argument identifying if image representation of samples should be shown"""
     global args
     return args.image
 
 
 def show_plot():
+    """Returns argument identifying if graph representation of samples should be shown"""
     global args
     return args.visualize
 
 
 def export_graph():
+    """Returns argument identifying if tensorflow graph file should be created"""
     global args
     return args.graph

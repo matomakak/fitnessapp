@@ -17,6 +17,14 @@ initialize_and_validate_globals()
 
 
 def plot_activity_axis(ax, x, y, estimation=None):
+    """
+    Plots 1 axis within 3 layout graph, possibility to append estimated chunks number in data within title
+    :param ax:
+    :param x:
+    :param y:
+    :param estimation:
+    :return:
+    """
     ax.plot(x, y)
     ax.xaxis.set_visible(False)
     ax.set_ylim([min(y) - np.std(y), max(y) + np.std(y)])
@@ -30,6 +38,17 @@ def plot_activity_axis(ax, x, y, estimation=None):
 
 
 def plot_activity(name, x, y, z, estimation=None, type=None):
+    """
+    Plots 3 layout graph for 1 dataset of 1 exercise with possibility to create clickable graph with extended
+    functionality
+    :param name: exercise name
+    :param x: array of x-axis values
+    :param y: array of y-axis values
+    :param z: array of z-axis values
+    :param estimation: estimated chunks in dataset
+    :param type: type of graph (if specified using ClickablePlot)
+    :return: if clickable plot - array of data chunks information
+    """
     fig, (ax0, ax1, ax2) = plt.subplots(nrows=3, figsize=(15, 10), sharex=True)
     length = len(x)
     plot_activity_axis(ax0, range(length), x, estimation)
@@ -46,6 +65,10 @@ def plot_activity(name, x, y, z, estimation=None, type=None):
 
 
 def plot_fft_axis(subplot, axis, id):
+    """
+    Plots axis for DFT used within chunks estimation
+    :param id: found peak (estimation)
+    """
     W = np.fft.fft(axis)
     length = axis.size
     freq = np.fft.fftfreq(axis.size, 1)
@@ -57,6 +80,16 @@ def plot_fft_axis(subplot, axis, id):
 
 
 def plot_fft(name, X, idx, Y, idy, Z, idz):
+    """
+    Plots 3 layout DFT graph showing estimation within 1 dataset of 1 exercise
+    :param name: exercise name
+    :param X: data of x-axis
+    :param idx: found peak in x-axis
+    :param Y: data of y-axis
+    :param idy: found peak in y-axis
+    :param Z: data of z-axis
+    :param idz: found peak in y-axis
+    """
     fig, (ax, ay, az) = plt.subplots(nrows=3, figsize=(15, 10), sharex=True)
 
     plot_fft_axis(ax, X, idx)
@@ -69,12 +102,22 @@ def plot_fft(name, X, idx, Y, idy, Z, idz):
 
 
 def normalize_axis(input):
+    """
+    Normalize array of data for DFT estimation purposes
+    :param input: array of data
+    :return: normalized array
+    """
     mu = np.mean(input, axis=0)
     sigma = np.std(input, axis=0)
     return (input - mu) / sigma
 
 
 def estimate_period(df):
+    """
+    Provides functionality for automatic estimation via DFT
+    :param df: dataframe containing all columns for 1 dataset of 1 exercise
+    :return: number of estimated repetitions in provided dataset
+    """
     if df[NAME].values[0].lower() == "none":
         return 0
     X = normalize_axis(df[X_AXIS]).values
@@ -102,6 +145,13 @@ def estimate_period(df):
 
 
 def filter_and_estimate(data):
+    """
+    Provides basic funtionality for filtering in and out within datasts and uses either manual or automatic estimations
+    of chunks{repetitions) within each dataset
+    Also provides possibility to save manual filtering data inputed from user
+    :param data: all datasets
+    :return: tuple: identified max/avg size of one chunk, list of all datasets filtered
+    """
     avg_max = 0
     max_count = 0
     all_max = 0
@@ -181,6 +231,11 @@ def filter_and_estimate(data):
 
 
 def read_data_and_filter(file_path):
+    """
+    Parses CSV data file and applies filter and estimation process
+    :param file_path: name of input file
+    :return: result from filter_and_estimate method
+    """
     column_names = [NAME, TIMESTAMP, X_AXIS, Y_AXIS, Z_AXIS]
     data = pd.read_csv(file_path, header=None, names=column_names, comment=';')
     data.dropna(axis=0, how='any', inplace=True)
@@ -188,6 +243,11 @@ def read_data_and_filter(file_path):
 
 
 def plot_images_and_exit(length, activities_list):
+    """
+    Renders graphs for all datasets in provided list of exercises and exits
+    :param length: size of one chunks
+    :param activities_list: list of all exercise datasets
+    """
     l_segments, l_labels = segment_signal(ceil(np.sqrt(length)) ** 2, activities_list)
     f = lambda x: np.abs(x)
     l_segments = f(l_segments)
@@ -211,11 +271,11 @@ def plot_images_and_exit(length, activities_list):
 
 ##############################################################################
 filter_output_data = []
-if filter_input():
+if filter_input():  # when requested prepares and read file containing manual filter data
     with open(filter_input()) as json_file:
         filter_input_data = json.load(json_file)
 length, activities = read_data_and_filter(input_file())
-if export_filter():
+if export_filter():  # when requested exports last manual data inputted within manual filtering/estimation
     with open(input_file + '.filtered_data', 'w') as outfile:
         json.dump(filter_output_data, outfile)
 
@@ -229,4 +289,4 @@ if show_plot():
     plt.waitforbuttonpress()
     exit(0)
 
-NEURAL_NETWORK(is_retraining(), length, activities).train()
+NEURAL_NETWORK(is_retraining(), length, activities).train()  # prepares and runs CNN

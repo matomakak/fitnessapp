@@ -12,8 +12,17 @@ tf.logging.set_verbosity(tf.logging.ERROR)
 
 
 class NEURAL_NETWORK:
-
+    """
+    Class providing functionality for re/training of neural network with its definition, initialization and proper data
+    exporting possibilities
+    """
     def __init__(self, retraining, length, activities):
+        """
+        Initializes class with dummy values
+        :param retraining: identifies if already existing trained model was provided
+        :param length: size of each sample within all datasets
+        :param activities: list of all datasets
+        """
         self.MODEL_NAME = glb.output_name()
         self.length = length
         self.activities = activities
@@ -44,6 +53,9 @@ class NEURAL_NETWORK:
             self.initialize_train()
 
     def initialize_train(self):
+        """
+        Provides initialization of CNN within first training
+        """
         segments, self.labels_full = segment_signal(self.length, self.activities)
         reshaped = segments.reshape(len(segments), 1, self.length, glb.NUM_CHANNELS)
         labels = np.asarray(pd.get_dummies(self.labels_full), dtype=np.int8)
@@ -83,6 +95,9 @@ class NEURAL_NETWORK:
         self.saver = tf.train.Saver()
 
     def initialize_retrain(self):
+        """
+        Reads already existing trained model which is going to be used for retraining, parses all required tensors
+        """
         head, tail = os.path.split(self.MODEL_NAME)
         self.saver = tf.train.import_meta_graph(tail + ".meta")
         if not head:
@@ -111,6 +126,10 @@ class NEURAL_NETWORK:
         self.total_batches = self.train_x.shape[0] // glb.BATCH_SIZE
 
     def train(self):
+        """
+        Training process allowing to go through whole process of training and validating neural network with provided
+        data
+        """
         if glb.export_graph():
             writer = tf.summary.FileWriter(glb.EXPORT_GRAPH, self.session.graph)
         for epoch in range(glb.TRAINING_EPOCHS):
@@ -128,6 +147,10 @@ class NEURAL_NETWORK:
         self.finalize()
 
     def finalize(self):
+        """
+        Provides functionality to exports tensorflow checkpoint file, tensorflow lite file and metadata file for
+        detection app purposes
+        """
         self.saver.save(self.session, save_path=self.MODEL_NAME + ".ckpt")
         converter = tf.contrib.lite.TFLiteConverter.from_session(self.session, [self.X], [self.y_])
         open('./' + self.MODEL_NAME + ".tflite", 'wb').write(converter.convert())
@@ -135,6 +158,10 @@ class NEURAL_NETWORK:
         self.session.close()
 
     def get_labels_file_content(self):
+        """
+        Creates content for metadata file
+        :return: string containing information about sample size used and all exercises ordered properly within training
+        """
         return "#SAMPLES#" + str(self.length) + "\n" + "\n".join(np.unique(self.labels_full))
 
     def __del__(self):
@@ -166,6 +193,12 @@ def apply_max_pool(x, kernel_size, stride_size):
 
 
 def segment_signal(max_len, filtered_activities):
+    """
+    Parses and prepares data from list of activities to CNN readable format
+    :param max_len: size of single sample
+    :param filtered_activities: list of activities
+    :return: tuple of datasets and labels in proper array formatting
+    """
     l_labels = np.empty(0)
     l_segments = np.empty((0, max_len, 3))
 
@@ -191,27 +224,3 @@ def segment_signal(max_len, filtered_activities):
             l_labels = np.append(l_labels, activity)
 
     return l_segments, l_labels
-
-###########################################
-# FREEZING AND RECOVERING + SAVING GRAPH #
-###########################################
-# from tensorflow.python.tools import freeze_graph
-#
-# input_graph_path = MODEL_NAME + '.pbtxt'
-# input_saver_def_path = ""
-# input_binary = False
-# output_node_names = OUTPUT_NAME
-# restore_op_name = "save/restore_all"
-# filename_tensor_name = "save/Const:0"
-# output_frozen_graph_name = MODEL_NAME + '_frozen' + '.pb'
-# clear_devices = True
-#
-# freeze_graph.freeze_graph(input_graph_path, input_saver_def_path, input_binary, checkpoint_path, output_node_names,
-#                           restore_op_name, filename_tensor_name, output_frozen_graph_name, clear_devices, "")
-##########
-# TFLITE #
-##########
-# converter = tf.contrib.lite.TFLiteConverter.from_frozen_graph(MODEL_NAME + '_frozen' + '.pb', ["I"],
-#                                                       [OUTPUT_NAME])
-# tflite_model = converter.convert()
-# open(MODEL_NAME + "converted.tflite", "wb").write(tflite_model)
