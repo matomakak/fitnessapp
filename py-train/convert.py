@@ -248,24 +248,28 @@ def plot_images_and_exit(length, activities_list):
     :param length: size of one chunks
     :param activities_list: list of all exercise datasets
     """
-    l_segments, l_labels = segment_signal(ceil(np.sqrt(length)) ** 2, activities_list)
+    size = ceil(np.sqrt(length))
+    l_segments, l_labels = segment_signal(size ** 2, activities_list)
     f = lambda x: np.abs(x)
     l_segments = f(l_segments)
     f1 = lambda x: x / np.max(x) * 255
-
     fig = plt.figure(figsize=(11, 11))
-    columns = int(np.sqrt(l_segments.shape[0]))
-    rows = ceil(l_segments.shape[0] / columns)
 
     ax = []
+    k = 1
     for j in range(l_segments.shape[0]):
+        if j % 25 == 0:
+            k = 1
+            if j > 0:
+                plt.show()
+                fig = plt.figure(figsize=(11, 11))
+                ax = []
         l_segments[j] = f1(l_segments[j])
-        img = l_segments[j].reshape(11, 11, 3).astype(np.uint8)
-        ax.append(fig.add_subplot(rows, columns, j + 1))
+        ax.append(fig.add_subplot(5, 5, k))
         ax[-1].set_title(l_labels[j])
         ax[-1].axis('off')
-        plt.imshow(img)
-    plt.show()
+        plt.imshow(l_segments[j].reshape(size, size, 3).astype(np.uint8))
+        k += 1
     exit(0)
 
 
