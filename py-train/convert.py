@@ -258,12 +258,11 @@ def plot_images_and_exit(length, activities_list):
     ax = []
     k = 1
     for j in range(l_segments.shape[0]):
-        if j % 25 == 0:
+        if j > 0 and j % 25 == 0:
             k = 1
-            if j > 0:
-                plt.show()
-                fig = plt.figure(figsize=(11, 11))
-                ax = []
+            plt.show()
+            fig = plt.figure(figsize=(11, 11))
+            ax = []
         l_segments[j] = f1(l_segments[j])
         ax.append(fig.add_subplot(5, 5, k))
         ax[-1].set_title(l_labels[j])
