@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Fitness App</string>
     <string name="error__no_storage">Storage is not available.</string>
+    <string name="error__no_data">Files missing</string>
     <string name="value_default">…</string>
     <string name="ok">OK</string>
     <string name="start">Start</string>

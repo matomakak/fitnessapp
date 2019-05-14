@@ -1,5 +1,7 @@
 package com.hlavackamartin.fitnessapp.recognition.fragment.impl;
 
+import static com.hlavackamartin.fitnessapp.recognition.Utilities.fileExist;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.Sensor;
@@ -110,8 +112,13 @@ public class DetectionFragment extends FitnessAppFragment
     y = new ArrayList<>();
     z = new ArrayList<>();
     input_signal = new ArrayList<>();
-    activityInference = ActivityInference.getInstance(getContext());
-
+    if (!fileExist(getContext(), getString(R.string.download_file)) || !fileExist(getContext(),
+        getString(R.string.download_labels))) {
+      activityInference = null;
+      mTitle.setText(R.string.error__no_data);
+    } else {
+      activityInference = ActivityInference.getInstance(getContext());
+    }
     return rootView;
   }
 
@@ -143,6 +150,9 @@ public class DetectionFragment extends FitnessAppFragment
    * Resets data and prepare for new recognition process. Subscribes to sensor
    */
   private void startTask() {
+    if (activityInference == null) {
+      return;
+    }
     dataPos = 0;
     x = new ArrayList<>(Collections.nCopies(N_SAMPLES, 0f));
     y = new ArrayList<>(Collections.nCopies(N_SAMPLES, 0f));
@@ -300,6 +310,10 @@ public class DetectionFragment extends FitnessAppFragment
    * #onClick(View)}
    */
   private void updateUI() {
+    if (activityInference == null) {
+      mTitle.setText(R.string.error__no_data);
+      return;
+    }
     String title = mValueShowing.getName();
     String value = "...";
     switch (mValueShowing) {

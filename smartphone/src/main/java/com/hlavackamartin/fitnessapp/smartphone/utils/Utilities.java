@@ -108,6 +108,15 @@ public class Utilities {
   }
 
 
+  public static boolean fileExist(Context context, String fileName) {
+    File file = null;
+    try {
+      file = getFile(context, fileName);
+    } catch (Exception ignored) {
+    }
+    return file != null;
+  }
+
   public static File getFile(Context context, String fileName) throws FileNotFoundException {
     File path = context.getExternalFilesDir(null);
     if (null == path) {

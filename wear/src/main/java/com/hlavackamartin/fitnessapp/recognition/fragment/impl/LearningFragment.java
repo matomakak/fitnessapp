@@ -1,6 +1,7 @@
 package com.hlavackamartin.fitnessapp.recognition.fragment.impl;
 
 import static android.app.Activity.RESULT_OK;
+import static com.hlavackamartin.fitnessapp.recognition.Utilities.fileExist;
 
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -103,7 +104,14 @@ public class LearningFragment extends FitnessAppFragment implements
 
     mTitle.setText(Utilities.isExternalStorageWritable() ?
         R.string.select_exercise : R.string.error__no_storage);
-    mButton.setOnClickListener(this);
+
+    if (!fileExist(getContext(), getString(R.string.download_file)) || !fileExist(getContext(),
+        getString(R.string.download_labels))) {
+      mButton.setEnabled(false);
+      mTitle.setText(R.string.error__no_data);
+    } else {
+      mButton.setOnClickListener(this);
+    }
 
     return rootView;
   }

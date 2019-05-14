@@ -141,6 +141,21 @@ public class Utilities {
   }
 
   /**
+   * Checks if file exists according to name from external application dir
+   *
+   * @param fileName name of file
+   * @return found file
+   */
+  public static boolean fileExist(Context context, String fileName) {
+    File file = null;
+    try {
+      file = getFile(context, fileName);
+    } catch (Exception ignored) {
+    }
+    return file != null;
+  }
+
+  /**
    * Checks write permissions for external application dir
    *
    * @return possibility to write in external application dir

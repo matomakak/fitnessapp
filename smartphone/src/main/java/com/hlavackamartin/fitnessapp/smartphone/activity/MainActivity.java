@@ -3,6 +3,7 @@ package com.hlavackamartin.fitnessapp.smartphone.activity;
 import static android.hardware.Sensor.TYPE_ACCELEROMETER;
 import static android.hardware.Sensor.TYPE_LINEAR_ACCELERATION;
 import static com.hlavackamartin.fitnessapp.smartphone.utils.Utilities.DEFAULT_SENSOR_DURATION_US;
+import static com.hlavackamartin.fitnessapp.smartphone.utils.Utilities.fileExist;
 
 import android.graphics.Color;
 import android.hardware.Sensor;
@@ -93,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
         firstTimestamp = event.timestamp;
       }
       final float floatTimestampMicros = (event.timestamp - firstTimestamp) / 1000000f;
-      if (event.sensor.getType() != Sensor.TYPE_LINEAR_ACCELERATION) {
+      if (activityInference != null && event.sensor.getType() == TYPE_LINEAR_ACCELERATION) {
 
         recordingDataX.add(event.values[0]);
         recordingDataY.add(event.values[1]);
@@ -153,7 +154,12 @@ public class MainActivity extends AppCompatActivity {
     N_SAMPLES = Utilities.readSampleSize(this);
 
     // Load the TensorFlow model
-    activityInference = ActivityInference.getInstance(this);
+    if (!fileExist(this, getString(R.string.download_file)) || !fileExist(this,
+        getString(R.string.download_labels))) {
+      activityInference = null;
+    } else {
+      activityInference = ActivityInference.getInstance(this);
+    }
 
     mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
@@ -174,26 +180,33 @@ public class MainActivity extends AppCompatActivity {
     btnScale = findViewById(R.id.btnScale);
     toggle70 = findViewById(R.id.toggle70);
 
-    toggleRec.setOnClickListener(view -> {
-      if (recStarted) {
-        stopRecInt();
-      } else {
-        startRec();
-      }
-    });
-    toggleAcc.setOnClickListener(view -> {
-      showAccelerometer = !showAccelerometer;
-      toggleAcc.setChecked(showAccelerometer);
-    });
-    btnScale.setText(String.valueOf(scaling));
-    btnScale.setOnClickListener(view -> {
-      scaling = scaling > 8 ? 1 : scaling + 1;
-      btnScale.setText(String.format("1/%d", scaling));
-    });
-    toggle70.setOnClickListener(view -> {
-      showAbove70Only = !showAbove70Only;
-      toggle70.setChecked(showAbove70Only);
-    });
+    if (activityInference != null) {
+      toggleRec.setOnClickListener(view -> {
+        if (recStarted) {
+          stopRecInt();
+        } else {
+          startRec();
+        }
+      });
+      toggleAcc.setOnClickListener(view -> {
+        showAccelerometer = !showAccelerometer;
+        toggleAcc.setChecked(showAccelerometer);
+      });
+      btnScale.setText(String.valueOf(scaling));
+      btnScale.setOnClickListener(view -> {
+        scaling = scaling > 8 ? 1 : scaling + 1;
+        btnScale.setText(String.format("1/%d", scaling));
+      });
+      toggle70.setOnClickListener(view -> {
+        showAbove70Only = !showAbove70Only;
+        toggle70.setChecked(showAbove70Only);
+      });
+    } else {
+      toggleRec.setEnabled(false);
+      toggleAcc.setEnabled(false);
+      btnScale.setEnabled(false);
+      toggle70.setEnabled(false);
+    }
 
     chart.setTouchEnabled(true);
     chart.setData(new LineData());
@@ -228,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
     createDataSets();
 
     if (!startRecInt()) {
-      Toast.makeText(MainActivity.this, "FAILED SENSOR", Toast.LENGTH_SHORT).show();
+      Toast.makeText(this, "FAILED SENSOR", Toast.LENGTH_SHORT).show();
       toggleRec.setChecked(false);
     }
   }

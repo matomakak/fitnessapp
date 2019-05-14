@@ -6,6 +6,7 @@ import com.hlavackamartin.fitnessapp.smartphone.data.Recognition;
 import com.hlavackamartin.fitnessapp.smartphone.utils.Utilities;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.tensorflow.lite.Interpreter;
 
@@ -22,6 +23,7 @@ public class ActivityInference {
     try {
       model = Utilities.getFile(context, context.getString(R.string.download_file));
     } catch (Exception ignored) {
+      tflite = null;
       return;
     }
     tflite = new Interpreter(model);
@@ -35,6 +37,9 @@ public class ActivityInference {
   }
 
   public List<Recognition> getActivityProb(float[][][][] inputSignal) {
+    if (tflite == null) {
+      return Collections.emptyList();
+    }
     float[][] result = new float[1][OUTPUT_LABELS.size()];
     tflite.run(inputSignal, result);
     return getSortedResult(result);
