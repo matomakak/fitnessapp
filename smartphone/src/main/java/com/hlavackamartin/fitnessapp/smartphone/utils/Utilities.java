@@ -114,7 +114,7 @@ public class Utilities {
       file = getFile(context, fileName);
     } catch (Exception ignored) {
     }
-    return file != null;
+    return file != null && file.exists();
   }
 
   public static File getFile(Context context, String fileName) throws FileNotFoundException {

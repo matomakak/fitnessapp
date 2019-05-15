@@ -62,10 +62,15 @@ public class LearningFragment extends FitnessAppFragment implements
       MotionRecordingService.LocalBinder binder = (MotionRecordingService.LocalBinder) service;
       mService = binder.getService();
       mServiceBound = true;
+      if ((selectedExercise != null) && !selectedExercise.isEmpty()) {
+        mButton.setEnabled(true);
+        mTitle.setText(selectedExercise);
+      }
     }
 
     @Override
     public void onServiceDisconnected(ComponentName arg0) {
+      mButton.setEnabled(false);
       mServiceBound = false;
     }
   };
@@ -104,14 +109,7 @@ public class LearningFragment extends FitnessAppFragment implements
 
     mTitle.setText(Utilities.isExternalStorageWritable() ?
         R.string.select_exercise : R.string.error__no_storage);
-
-    if (!fileExist(getContext(), getString(R.string.download_file)) || !fileExist(getContext(),
-        getString(R.string.download_labels))) {
-      mButton.setEnabled(false);
-      mTitle.setText(R.string.error__no_data);
-    } else {
-      mButton.setOnClickListener(this);
-    }
+    mButton.setOnClickListener(this);
 
     return rootView;
   }
@@ -124,13 +122,16 @@ public class LearningFragment extends FitnessAppFragment implements
     super.onResume();
     mButton.setEnabled(false);
     if (Utilities.isExternalStorageWritable()) {
-      if (selectedExercise != null && !selectedExercise.isEmpty()) {
-        mButton.setEnabled(mServiceBound);
-        mTitle.setText(selectedExercise);
-      }
       if (!mServiceBound) {
-        Intent intent = new Intent(getActivity(), MotionRecordingService.class);
-        getActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        if (fileExist(getContext(), getString(R.string.download_file)) && fileExist(getContext(),
+            getString(R.string.download_labels))) {
+          Intent intent = new Intent(getActivity(), MotionRecordingService.class);
+          getActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        } else if (mTitle != null) {
+          mTitle.setText(R.string.error__no_data);
+        }
+      } else {
+        enableSelectedExercise(selectedExercise);
       }
     }
   }
@@ -143,9 +144,13 @@ public class LearningFragment extends FitnessAppFragment implements
    */
   private void enableSelectedExercise(String name) {
     selectedExercise = name;
-    mTitle.setText(selectedExercise);
-    if (mButton != null) {
-      mButton.setEnabled(Utilities.isExternalStorageWritable() && mServiceBound);
+    if (selectedExercise != null) {
+      mTitle.setText(selectedExercise);
+      if (mButton != null) {
+        mButton.setEnabled(Utilities.isExternalStorageWritable() && mServiceBound);
+      }
+    } else {
+      mButton.setEnabled(false);
     }
   }
 

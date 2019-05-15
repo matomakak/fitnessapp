@@ -152,7 +152,7 @@ public class Utilities {
       file = getFile(context, fileName);
     } catch (Exception ignored) {
     }
-    return file != null;
+    return file != null && file.exists();
   }
 
   /**
