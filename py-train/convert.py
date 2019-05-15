@@ -1,3 +1,5 @@
+#  Copyright (c) 2019. Martin Hlavačka
+
 import sys
 import warnings
 

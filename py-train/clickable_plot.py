@@ -1,3 +1,5 @@
+#  Copyright (c) 2019. Martin Hlavačka
+
 from enum import Enum
 
 import matplotlib.lines as lines
