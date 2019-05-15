@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2019. Martin Hlavačka
+ */
+
 package com.hlavackamartin.fitnessapp.smartphone.utils;
 
 import android.content.Context;

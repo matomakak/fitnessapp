@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2019. Martin Hlavačka
+ */
+
 package com.hlavackamartin.fitnessapp.smartphone.utils;
 
 import com.github.mikephil.charting.components.AxisBase;

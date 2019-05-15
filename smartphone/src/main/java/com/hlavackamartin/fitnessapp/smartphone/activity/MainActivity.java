@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2019. Martin Hlavačka
+ */
+
 package com.hlavackamartin.fitnessapp.smartphone.activity;
 
 import static android.hardware.Sensor.TYPE_ACCELEROMETER;

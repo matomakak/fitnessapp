@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2019. Martin Hlavačka
+ */
+
 package com.hlavackamartin.fitnessapp.recognition.task;
 
 import android.app.ProgressDialog;
