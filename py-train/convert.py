@@ -281,7 +281,7 @@ if filter_input():  # when requested prepares and read file containing manual fi
         filter_input_data = json.load(json_file)
 length, activities = read_data_and_filter(input_file())
 if export_filter():  # when requested exports last manual data inputted within manual filtering/estimation
-    with open(input_file + '.filtered_data', 'w') as outfile:
+    with open(input_file() + '.filtered_data', 'w') as outfile:
         json.dump(filter_output_data, outfile)
 
 if show_image():
