@@ -54,4 +54,5 @@ out/
 *.labels
 *.tflite
 *.exported
+*.filtered_data
 checkpoint

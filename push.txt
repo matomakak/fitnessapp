@@ -1,0 +1,1 @@
+adb -s 127.0.0.1:4444 push * /storage/emulated/0/Android/data/com.hlavackamartin.fitnessapp.recognition/files/*
